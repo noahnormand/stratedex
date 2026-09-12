@@ -6,6 +6,7 @@
 // la plus récente disponible pour chaque format.
 
 import { readFileSync, writeFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -14,9 +15,9 @@ const STATS = "https://www.smogon.com/stats/";
 
 // Formats suivis : regex avec (gen) et (coupure ELO) capturées.
 const FORMATS = [
-  { id: "ou", label: "OU (Smogon 6v6)", pattern: /^gen(\d+)ou-(\d+)\.txt$/ },
-  { id: "uu", label: "UU (Smogon 6v6)", pattern: /^gen(\d+)uu-(\d+)\.txt$/ },
-  { id: "vgc", label: "VGC (officiel 2v2)", pattern: /^gen(\d+)vgc\d{4}[a-z0-9]*-(\d+)\.txt$/ },
+  { id: "ou", label: "OU (Smogon 6v6)", pattern: /^gen(\d+)ou-(\d+)\.txt(?:\.gz)?$/ },
+  { id: "uu", label: "UU (Smogon 6v6)", pattern: /^gen(\d+)uu-(\d+)\.txt(?:\.gz)?$/ },
+  { id: "vgc", label: "VGC (officiel 2v2)", pattern: /^gen(\d+)vgc\d{4}[a-z0-9]*-(\d+)\.txt(?:\.gz)?$/ },
 ];
 
 const speciesEn = JSON.parse(readFileSync(join(ROOT, "scripts/speciesEn.json"), "utf8"));
@@ -39,6 +40,12 @@ async function fetchText(url) {
     headers: { "User-Agent": "StratedexUsageBot/1.0 (+https://noahnormand.github.io/stratedex/)" },
   });
   if (!res.ok) throw new Error(`${url} -> ${res.status}`);
+  if (url.endsWith(".gz")) {
+    const buf = Buffer.from(await res.arrayBuffer());
+    // Certains serveurs décompressent déjà via Content-Encoding : on vérifie
+    // la signature gzip (0x1f 0x8b) avant de décompresser.
+    return buf[0] === 0x1f && buf[1] === 0x8b ? gunzipSync(buf).toString("utf8") : buf.toString("utf8");
+  }
   return res.text();
 }
 
@@ -62,12 +69,12 @@ if (!month) throw new Error("Aucun mois trouvé sur smogon.com/stats");
 // 2) Fichiers .txt disponibles ce mois-là
 const monthHtml = await fetchText(`${STATS}${month}/`);
 const monthPageLinks = listLinks(monthHtml);
-const files = monthPageLinks.filter((f) => f.endsWith(".txt"));
-console.log(`Fichiers .txt trouvés pour ${month} : ${files.length}`);
+const files = monthPageLinks.filter((f) => f.endsWith(".txt") || f.endsWith(".txt.gz"));
+console.log(`Fichiers de stats trouvés pour ${month} : ${files.length}`);
 if (files.length === 0) {
   console.log("Liens de la page du mois :", monthPageLinks.slice(0, 20));
   console.log("Début du HTML de la page du mois :\n" + monthHtml.slice(0, 800));
-  throw new Error("Aucun fichier .txt listé : voir le diagnostic ci-dessus");
+  throw new Error("Aucun fichier de stats listé : voir le diagnostic ci-dessus");
 }
 
 // 3) Pour chaque format : dernière génération disponible, puis coupure ELO

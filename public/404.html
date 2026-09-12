@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>StratéDex - Page introuvable</title>
+    <script>
+      // GitHub Pages ne connaît pas les routes côté client :
+      // on redirige vers l'accueil en conservant le chemin demandé.
+      sessionStorage.setItem("stratedex-redirect", location.pathname);
+      location.replace("/stratedex/");
+    </script>
+  </head>
+  <body>Redirection...</body>
+</html>

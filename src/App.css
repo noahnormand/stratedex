@@ -1,0 +1,195 @@
+/* Styles minimalistes, non finalisés : la direction visuelle viendra plus tard. */
+
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+}
+
+body { margin: 0; }
+
+.app { max-width: 960px; margin: 0 auto; padding: 1rem; }
+
+.app-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #8884;
+  margin-bottom: 1rem;
+}
+
+.app-title { font-size: 1.4rem; font-weight: 700; text-decoration: none; color: inherit; }
+.app-subtitle { opacity: 0.7; font-size: 0.9rem; }
+
+.status { opacity: 0.8; }
+
+.search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pokedex-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+
+.pokedex-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  border: 1px solid #8884;
+  text-decoration: none;
+  color: inherit;
+}
+
+.pokedex-num { opacity: 0.6; font-size: 0.8rem; }
+.pokedex-name { }
+
+.detail-header { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.role { max-width: 60ch; }
+
+.stats-table th { text-align: left; padding-right: 1rem; }
+.stats-table td { padding-right: 0.75rem; }
+.stat-bar-cell { width: 220px; }
+.stat-bar { height: 0.6rem; background: #6a8; min-width: 2px; }
+
+.type-matchups th { text-align: left; padding: 0.25rem 1rem 0.25rem 0; vertical-align: top; white-space: nowrap; }
+.type-matchups td { padding: 0.25rem 0; }
+
+.type-tags { display: inline-flex; flex-wrap: wrap; gap: 0.3rem; }
+.type-tag {
+  padding: 0.1rem 0.5rem;
+  border: 1px solid #8886;
+  font-size: 0.85rem;
+}
+
+.moves-list {
+  columns: 3;
+  font-size: 0.9rem;
+}
+@media (max-width: 640px) {
+  .moves-list { columns: 2; }
+}
+
+/* --- Team Builder --- */
+.app-nav { margin-left: auto; display: flex; gap: 1rem; }
+.app-nav a { color: inherit; text-decoration: none; opacity: 0.85; }
+.intro { max-width: 65ch; opacity: 0.85; }
+
+.team-search { position: relative; }
+.suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0;
+  top: 100%;
+  background: Canvas;
+  border: 1px solid #8886;
+}
+.suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.35rem 0.6rem;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.suggestions button:hover { background: #8882; }
+
+.team-grid {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+.team-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.6rem;
+  border: 1px solid #8884;
+}
+.team-card-empty { justify-content: center; opacity: 0.4; min-height: 110px; }
+.team-card .remove {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.3rem;
+  background: none;
+  border: 0;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+}
+
+.coverage-alerts { border: 1px solid #c664; padding: 0 1rem 0.5rem; margin: 1rem 0; }
+.coverage-table { border-collapse: collapse; width: 100%; }
+.coverage-table th, .coverage-table td { text-align: left; padding: 0.3rem 0.6rem; border-bottom: 1px solid #8883; }
+.coverage-danger td { color: #c33; }
+
+/* Partenaires suggérés */
+.partners {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.4rem;
+}
+.partners button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  background: none;
+  border: 1px solid #8884;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.partner-note { margin-left: auto; opacity: 0.65; font-size: 0.8rem; white-space: nowrap; }
+
+/* --- Tier lists --- */
+.format-tabs { display: flex; gap: 0.4rem; margin: 0.75rem 0; flex-wrap: wrap; }
+.tab {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid #8885;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.tab-active { border-color: currentColor; font-weight: 600; }
+.tier-meta { opacity: 0.7; font-size: 0.9rem; }
+.tier-block { border-top: 1px solid #8883; padding-top: 0.25rem; }
+.tier-rank { font-size: 1.6rem; margin: 0.5rem 0; }
+.tier-entries { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.tier-entry-head { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; color: inherit; }
+.tier-entry-head > span { display: flex; flex-direction: column; gap: 0.2rem; }
+.tier-comment { margin: 0.25rem 0 0; max-width: 70ch; opacity: 0.9; }
+
+/* Usage réel */
+.usage-block { border-top: 1px solid #8883; margin-top: 0.75rem; }
+.usage-list { padding-left: 1.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.2rem 1.5rem; }
+.usage-entry { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit; }
+.usage-pct { opacity: 0.65; font-variant-numeric: tabular-nums; }

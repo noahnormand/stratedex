@@ -35,15 +35,17 @@ function toSpeciesId(name) {
 }
 
 async function fetchText(url) {
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    headers: { "User-Agent": "StratedexUsageBot/1.0 (+https://noahnormand.github.io/stratedex/)" },
+  });
   if (!res.ok) throw new Error(`${url} -> ${res.status}`);
   return res.text();
 }
 
 /** Liste les liens (href) d'une page d'index de smogon.com/stats. */
 function listLinks(html) {
-  return [...html.matchAll(/href="([^"]+)"/gi)].map((m) =>
-    decodeURIComponent(m[1]).replace(/^\.\//, "")
+  return [...html.matchAll(/href\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>"']+))/gi)].map((m) =>
+    decodeURIComponent(m[1] ?? m[2] ?? m[3]).replace(/^\.\//, "")
   );
 }
 
@@ -58,11 +60,14 @@ const month = months.at(-1);
 if (!month) throw new Error("Aucun mois trouvé sur smogon.com/stats");
 
 // 2) Fichiers .txt disponibles ce mois-là
-const files = listLinks(await fetchText(`${STATS}${month}/`)).filter((f) => f.endsWith(".txt"));
+const monthHtml = await fetchText(`${STATS}${month}/`);
+const monthPageLinks = listLinks(monthHtml);
+const files = monthPageLinks.filter((f) => f.endsWith(".txt"));
 console.log(`Fichiers .txt trouvés pour ${month} : ${files.length}`);
 if (files.length === 0) {
-  console.log("Exemples de liens bruts :", monthLinks.slice(0, 10));
-  throw new Error("Aucun fichier .txt listé : le format de la page d'index a peut-être changé");
+  console.log("Liens de la page du mois :", monthPageLinks.slice(0, 20));
+  console.log("Début du HTML de la page du mois :\n" + monthHtml.slice(0, 800));
+  throw new Error("Aucun fichier .txt listé : voir le diagnostic ci-dessus");
 }
 
 // 3) Pour chaque format : dernière génération disponible, puis coupure ELO

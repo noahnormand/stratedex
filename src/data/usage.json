@@ -1,4 +1,323 @@
 {
   "updated": "2026-08",
-  "formats": {}
+  "formats": {
+    "ou": {
+      "label": "OU (Smogon 6v6)",
+      "file": "gen9ou-1825.txt.gz",
+      "top": [
+        {
+          "name": "Great Tusk",
+          "id": 984,
+          "usagePct": 34.06238
+        },
+        {
+          "name": "Gholdengo",
+          "id": 1000,
+          "usagePct": 27.90112
+        },
+        {
+          "name": "Kingambit",
+          "id": 983,
+          "usagePct": 25.95607
+        },
+        {
+          "name": "Zamazenta",
+          "id": 889,
+          "usagePct": 24.92774
+        },
+        {
+          "name": "Dragonite",
+          "id": 149,
+          "usagePct": 23.20804
+        },
+        {
+          "name": "Ogerpon-Wellspring",
+          "id": 1017,
+          "usagePct": 20.78179
+        },
+        {
+          "name": "Kyurem",
+          "id": 646,
+          "usagePct": 18.70707
+        },
+        {
+          "name": "Samurott-Hisui",
+          "id": 503,
+          "usagePct": 18.06126
+        },
+        {
+          "name": "Raging Bolt",
+          "id": 1021,
+          "usagePct": 16.70905
+        },
+        {
+          "name": "Gliscor",
+          "id": 472,
+          "usagePct": 16.3257
+        },
+        {
+          "name": "Glimmora",
+          "id": 970,
+          "usagePct": 15.52734
+        },
+        {
+          "name": "Slowking-Galar",
+          "id": 199,
+          "usagePct": 15.37753
+        },
+        {
+          "name": "Landorus-Therian",
+          "id": 645,
+          "usagePct": 14.07702
+        },
+        {
+          "name": "Cresselia",
+          "id": 488,
+          "usagePct": 12.91628
+        },
+        {
+          "name": "Cinderace",
+          "id": 815,
+          "usagePct": 12.74248
+        },
+        {
+          "name": "Corviknight",
+          "id": 823,
+          "usagePct": 11.71997
+        },
+        {
+          "name": "Iron Valiant",
+          "id": 1006,
+          "usagePct": 11.63437
+        },
+        {
+          "name": "Ting-Lu",
+          "id": 1003,
+          "usagePct": 10.9749
+        },
+        {
+          "name": "Darkrai",
+          "id": 491,
+          "usagePct": 10.80245
+        },
+        {
+          "name": "Moltres",
+          "id": 146,
+          "usagePct": 10.10649
+        }
+      ]
+    },
+    "uu": {
+      "label": "UU (Smogon 6v6)",
+      "file": "gen9uu-1760.txt.gz",
+      "top": [
+        {
+          "name": "Latios",
+          "id": 381,
+          "usagePct": 31.054
+        },
+        {
+          "name": "Excadrill",
+          "id": 530,
+          "usagePct": 30.43483
+        },
+        {
+          "name": "Mandibuzz",
+          "id": 630,
+          "usagePct": 22.77954
+        },
+        {
+          "name": "Skarmory",
+          "id": 227,
+          "usagePct": 20.54125
+        },
+        {
+          "name": "Lokix",
+          "id": 920,
+          "usagePct": 19.66192
+        },
+        {
+          "name": "Donphan",
+          "id": 232,
+          "usagePct": 18.17254
+        },
+        {
+          "name": "Heatran",
+          "id": 485,
+          "usagePct": 18.12874
+        },
+        {
+          "name": "Keldeo",
+          "id": 647,
+          "usagePct": 17.7369
+        },
+        {
+          "name": "Slither Wing",
+          "id": 988,
+          "usagePct": 14.47152
+        },
+        {
+          "name": "Hydrapple",
+          "id": 1019,
+          "usagePct": 14.38951
+        },
+        {
+          "name": "Tinkaton",
+          "id": 959,
+          "usagePct": 14.29516
+        },
+        {
+          "name": "Tyranitar",
+          "id": 248,
+          "usagePct": 13.6919
+        },
+        {
+          "name": "Weavile",
+          "id": 461,
+          "usagePct": 12.97817
+        },
+        {
+          "name": "Skeledirge",
+          "id": 911,
+          "usagePct": 12.76406
+        },
+        {
+          "name": "Arcanine-Hisui",
+          "id": 59,
+          "usagePct": 12.60829
+        },
+        {
+          "name": "Sinistcha",
+          "id": 1013,
+          "usagePct": 12.16725
+        },
+        {
+          "name": "Fezandipiti",
+          "id": 1016,
+          "usagePct": 12.14336
+        },
+        {
+          "name": "Slowking",
+          "id": 199,
+          "usagePct": 11.30647
+        },
+        {
+          "name": "Hippowdon",
+          "id": 450,
+          "usagePct": 11.15662
+        },
+        {
+          "name": "Scizor",
+          "id": 212,
+          "usagePct": 10.81962
+        }
+      ]
+    },
+    "vgc": {
+      "label": "VGC (officiel 2v2)",
+      "file": "gen6vgc2015-1760.txt.gz",
+      "top": [
+        {
+          "name": "Landorus-Therian",
+          "id": 645,
+          "usagePct": 99.89786
+        },
+        {
+          "name": "Aegislash",
+          "id": 681,
+          "usagePct": 58.91603
+        },
+        {
+          "name": "Kangaskhan-Mega",
+          "id": 115,
+          "usagePct": 53.21195
+        },
+        {
+          "name": "Thundurus",
+          "id": 642,
+          "usagePct": 53.01984
+        },
+        {
+          "name": "Sylveon",
+          "id": 700,
+          "usagePct": 50.08705
+        },
+        {
+          "name": "Volcarona",
+          "id": 637,
+          "usagePct": 49.6785
+        },
+        {
+          "name": "Swampert",
+          "id": 260,
+          "usagePct": 49.6785
+        },
+        {
+          "name": "Charizard-Mega-Y",
+          "id": 6,
+          "usagePct": 46.69721
+        },
+        {
+          "name": "Cresselia",
+          "id": 488,
+          "usagePct": 40.98729
+        },
+        {
+          "name": "Heatran",
+          "id": 485,
+          "usagePct": 40.98289
+        },
+        {
+          "name": "Mawile-Mega",
+          "id": 303,
+          "usagePct": 39.49711
+        },
+        {
+          "name": "Jellicent",
+          "id": 593,
+          "usagePct": 5.83865
+        },
+        {
+          "name": "Tyranitar",
+          "id": 248,
+          "usagePct": 5.83862
+        },
+        {
+          "name": "Entei",
+          "id": 244,
+          "usagePct": 3.21604
+        },
+        {
+          "name": "Machamp",
+          "id": 68,
+          "usagePct": 1.35244
+        },
+        {
+          "name": "Smeargle",
+          "id": 235,
+          "usagePct": 0.18341
+        },
+        {
+          "name": "Talonflame",
+          "id": 663,
+          "usagePct": 0.18304
+        },
+        {
+          "name": "Amoonguss",
+          "id": 591,
+          "usagePct": 0.133
+        },
+        {
+          "name": "Garchomp",
+          "id": 445,
+          "usagePct": 0.09329
+        },
+        {
+          "name": "Scrafty",
+          "id": 560,
+          "usagePct": 0.07101
+        }
+      ]
+    }
+  }
 }

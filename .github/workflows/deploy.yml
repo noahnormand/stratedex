@@ -1,8 +1,13 @@
-# Déploiement automatique sur GitHub Pages à chaque push sur main.
+# Déploiement automatique sur GitHub Pages à chaque push sur main,
+# et après chaque mise à jour automatique des stats d'usage.
 name: Déploiement GitHub Pages
 
 on:
   push:
+    branches: [main]
+  workflow_run:
+    workflows: ["Mise à jour des stats d'usage"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -20,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 22

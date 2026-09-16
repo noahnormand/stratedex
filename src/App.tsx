@@ -6,6 +6,8 @@ import PokedexList from "./pages/PokedexList";
 import PokemonDetail from "./pages/PokemonDetail";
 import TeamBuilder from "./pages/TeamBuilder";
 import TierLists from "./pages/TierLists";
+import Courses from "./pages/Courses";
+import Lesson from "./pages/Lesson";
 
 export default function App() {
   return (
@@ -17,6 +19,7 @@ export default function App() {
           <Link to="/">Pokédex</Link>
           <Link to="/team-builder">Team Builder</Link>
           <Link to="/tiers">Tier lists</Link>
+          <Link to="/cours">Cours</Link>
         </nav>
       </header>
       <main>
@@ -25,6 +28,8 @@ export default function App() {
           <Route path="/pokemon/:id" element={<PokemonDetail />} />
           <Route path="/team-builder" element={<TeamBuilder />} />
           <Route path="/tiers" element={<TierLists />} />
+          <Route path="/cours" element={<Courses />} />
+          <Route path="/cours/:slug" element={<Lesson />} />
           <Route path="*" element={<p>Page introuvable. <Link to="/">Retour au Pokédex</Link></p>} />
         </Routes>
       </main>

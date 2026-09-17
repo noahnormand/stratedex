@@ -17,6 +17,7 @@ import {
   type TypeSlug,
 } from "../data/typeChart";
 import { getRole } from "../data/role";
+import { TIER_EXPLANATIONS, tierOf } from "../data/smogonTiers";
 import { abilityFr, idFromUrl, moveFr } from "../data/frNames";
 
 const STAT_LABELS_FR: Record<string, string> = {
@@ -63,6 +64,7 @@ export default function PokemonDetail() {
   const types = pokemon.types.map((t) => t.type.name as TypeSlug);
   const groups = groupMultipliers(getDefensiveMultipliers(types));
   const role = getRole(pokemon.stats);
+  const tier = tierOf(pokemon.id);
   const artwork =
     pokemon.sprites.other?.["official-artwork"]?.front_default ??
     pokemon.sprites.front_default;
@@ -76,6 +78,14 @@ export default function PokemonDetail() {
         <div>
           <h1>{nameFr} <span className="pokedex-num">#{String(pokemon.id).padStart(4, "0")}</span></h1>
           <TypeTags types={types} />
+          {tier && (
+            <p className="tier-badge-line">
+              <span className="tier-badge" title={TIER_EXPLANATIONS[tier.label] ?? ""}>
+                Tier {tier.label}{tier.natDex ? " (NatDex)" : ""}
+              </span>{" "}
+              <Link to="/tiers">Comprendre les tiers</Link>
+            </p>
+          )}
           <p className="role">
             <strong>{role.label}</strong> : {role.description}{" "}
             <Link to="/roles">Comprendre les rôles</Link>

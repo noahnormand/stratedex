@@ -21,15 +21,16 @@ jobs:
         with:
           node-version: 22
       - run: node scripts/update-usage.mjs
+      - run: node scripts/update-tiers.mjs
       - name: Commit si changement
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/data/usage.json
+          git add src/data/usage.json src/data/tiersById.json
           if git diff --cached --quiet; then
             echo "Aucun changement, rien à pousser."
           else
-            git commit -m "Stats d'usage Smogon : mise à jour automatique"
+            git commit -m "Stats d'usage et tiers Smogon : mise à jour automatique"
             git pull --rebase origin main
             git push origin main
           fi

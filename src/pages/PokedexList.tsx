@@ -11,6 +11,7 @@ import {
   type SpeciesListItem,
 } from "../api/pokeapi";
 import { speciesFrName } from "../data/frNames";
+import { TIER_ORDER, tierOf } from "../data/smogonTiers";
 
 /** Normalise une chaîne pour la recherche (minuscules, sans accents). */
 function normalize(s: string): string {
@@ -22,11 +23,13 @@ interface Entry {
   nameEn: string;
   nameFr: string;
   searchKey: string;
+  tier: string | null;
 }
 
 export default function PokedexList() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [search, setSearch] = useState("");
+  const [tierFilter, setTierFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +45,7 @@ export default function PokedexList() {
               nameEn: s.name,
               nameFr,
               searchKey: normalize(`${nameFr} ${s.name}`),
+              tier: tierOf(id)?.label ?? null,
             };
           })
         );
@@ -52,22 +56,37 @@ export default function PokedexList() {
 
   const filtered = useMemo(() => {
     const q = normalize(search.trim());
-    if (!q) return entries;
-    return entries.filter((e) => e.searchKey.includes(q));
-  }, [entries, search]);
+    return entries.filter(
+      (e) =>
+        (!q || e.searchKey.includes(q)) &&
+        (!tierFilter || e.tier === tierFilter)
+    );
+  }, [entries, search, tierFilter]);
 
   if (loading) return <p className="status">Chargement du Pokédex...</p>;
   if (error) return <p className="status">Erreur : {error}</p>;
 
   return (
     <section>
-      <input
-        type="search"
-        className="search"
-        placeholder="Rechercher un Pokémon..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div className="list-filters">
+        <input
+          type="search"
+          className="search"
+          placeholder="Rechercher un Pokémon..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <select
+          value={tierFilter}
+          onChange={(e) => setTierFilter(e.target.value)}
+          aria-label="Filtrer par tier"
+        >
+          <option value="">Tous les tiers</option>
+          {TIER_ORDER.map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+      </div>
       <ul className="pokedex-grid">
         {filtered.map((e) => (
           <li key={e.id}>

@@ -272,3 +272,17 @@ body { margin: 0; }
 
 /* Rôles */
 .role-block { border-top: 1px solid #8883; max-width: 75ch; }
+
+/* Tiers */
+.list-filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+.list-filters .search { margin-bottom: 0; }
+.list-filters select { font: inherit; padding: 0.4rem; }
+.tier-badge {
+  display: inline-block;
+  border: 1px solid currentColor;
+  padding: 0.05rem 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.tier-badge-line { margin: 0.4rem 0; }
+.tier-badge-small { font-size: 0.75rem; margin-top: 0.15rem; opacity: 0.85; }

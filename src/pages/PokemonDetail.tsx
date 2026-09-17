@@ -77,7 +77,8 @@ export default function PokemonDetail() {
           <h1>{nameFr} <span className="pokedex-num">#{String(pokemon.id).padStart(4, "0")}</span></h1>
           <TypeTags types={types} />
           <p className="role">
-            <strong>{role.label}</strong> : {role.description}
+            <strong>{role.label}</strong> : {role.description}{" "}
+            <Link to="/roles">Comprendre les rôles</Link>
           </p>
           <p>Taille : {pokemon.height / 10} m - Poids : {pokemon.weight / 10} kg</p>
         </div>

@@ -269,3 +269,6 @@ body { margin: 0; }
 
 .lesson-table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; }
 .lesson-table th, .lesson-table td { border: 1px solid #8884; text-align: left; padding: 0.4rem 0.6rem; vertical-align: top; }
+
+/* Rôles */
+.role-block { border-top: 1px solid #8883; max-width: 75ch; }

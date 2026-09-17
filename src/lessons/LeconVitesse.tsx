@@ -48,6 +48,22 @@ export default function LeconVitesse() {
         construisent autour.
       </p>
 
+      <h3>Les paliers de Vitesse (speed tiers)</h3>
+      <p>
+        En pratique, on ne mémorise pas la Vitesse exacte de chaque Pokémon :
+        on retient des paliers de stat de base. Repères utiles : la zone
+        70-80 (lents, souvent défensifs), la zone 100 (le grand carrefour où
+        se croisent énormément d'attaquants), et 110+ (les rapides qui
+        devancent presque tout). Entre deux Pokémon du même palier, ce sont
+        les EV et la nature qui font la différence, d'où l'importance de la
+        leçon précédente.
+      </p>
+      <p>
+        Dernier levier : les <strong>crans de Vitesse</strong>. Des coups
+        comme Danse Draco (+1 Vitesse) ou l'objet Mouchoir Choix (x1.5)
+        bousculent les paliers en plein combat. Un Pokémon moyen en Vitesse
+        peut devenir le plus rapide du terrain après un boost.
+      </p>
       <h3>Essaie par toi-même</h3>
       <div className="lesson-controls">
         <fieldset>

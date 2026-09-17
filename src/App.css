@@ -211,3 +211,61 @@ body { margin: 0; }
 .lesson-note { opacity: 0.65; font-size: 0.9rem; }
 .lesson-footer { border-top: 1px solid #8883; margin-top: 1.5rem; padding-top: 0.75rem; }
 .lesson-nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.75rem; flex-wrap: wrap; }
+
+/* --- Quiz combat --- */
+.quiz { margin-top: 2rem; border-top: 1px solid #8883; padding-top: 0.5rem; }
+.battle {
+  border: 2px solid #445;
+  background: #9aca6a; /* herbe des combats, aplat */
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: #1c2210;
+}
+.battle-side { display: flex; align-items: flex-end; gap: 1rem; }
+.battle-enemy { justify-content: flex-end; }
+.battle-player { justify-content: flex-start; }
+.battle-side img { image-rendering: pixelated; }
+.hp-box {
+  background: #f8f0d8;
+  border: 2px solid #445;
+  padding: 0.3rem 0.6rem;
+  min-width: 200px;
+}
+.hp-name { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.9rem; }
+.hp-bar { border: 1px solid #445; background: #d8d0b8; height: 0.55rem; margin-top: 0.25rem; }
+.hp-fill { height: 100%; transition: width 0.4s steps(8); }
+.hp-high { background: #4a9e46; }
+.hp-mid { background: #cfa53c; }
+.hp-low { background: #c04040; }
+.battle-textbox {
+  border: 2px solid #445;
+  border-top: 0;
+  background: #f8f0d8;
+  color: #1c2210;
+  padding: 0.75rem;
+}
+.battle-text { margin: 0 0 0.6rem; }
+.battle-moves {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+.battle-moves button, .battle-actions button {
+  border: 2px solid #445;
+  background: #fff;
+  color: #1c2210;
+  font: inherit;
+  padding: 0.5rem 0.6rem;
+  cursor: pointer;
+  text-align: left;
+}
+.battle-moves button:focus-visible, .battle-actions button:focus-visible { outline: 3px solid #c04040; }
+@media (max-width: 560px) {
+  .battle-moves { grid-template-columns: 1fr; }
+  .hp-box { min-width: 0; flex: 1; }
+}
+
+.lesson-table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; }
+.lesson-table th, .lesson-table td { border: 1px solid #8884; text-align: left; padding: 0.4rem 0.6rem; vertical-align: top; }

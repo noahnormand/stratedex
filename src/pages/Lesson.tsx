@@ -11,6 +11,7 @@ import LeconEvIv from "../lessons/LeconEvIv";
 import LeconVitesse from "../lessons/LeconVitesse";
 import LeconCoups from "../lessons/LeconCoups";
 import LeconEquipe from "../lessons/LeconEquipe";
+import QuizCombat from "../lessons/QuizCombat";
 
 const COMPONENTS: Record<string, ComponentType> = {
   "types-et-faiblesses": LeconTypes,
@@ -41,6 +42,7 @@ export default function Lesson() {
       <Link to="/cours">&larr; Toutes les leçons</Link>
       <h1>{meta.title}</h1>
       <Content />
+      <QuizCombat slug={meta.slug} onWin={() => setCompletedState(setCompleted(meta.slug, true))} />
       <div className="lesson-footer">
         <label className="lesson-check">
           <input

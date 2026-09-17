@@ -39,6 +39,23 @@ export default function LeconCoups() {
         toutes les capacités apprenables, et la leçon 1 t'aide à identifier
         les types de couverture utiles contre les faiblesses courantes.
       </p>
+      <h3>Exemple analysé : un moveset de Carchacrok (Dragon/Sol)</h3>
+      <table className="lesson-table">
+        <thead>
+          <tr><th>Coup</th><th>Rôle dans le plan</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Séisme</td><td>STAB Sol : la source de dégâts principale, fiable et puissante.</td></tr>
+          <tr><td>Dracogriffe</td><td>STAB Dragon : frappe fort presque toutes les cibles neutres au Sol, en particulier les Dragons adverses.</td></tr>
+          <tr><td>Lame de Roc</td><td>Couverture Roche : frappe les types Vol et Insecte, immunisés ou résistants au Sol.</td></tr>
+          <tr><td>Danse-Lames</td><td>Statut : +2 Attaque, transforme Carchacrok en menace de fin de match.</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Remarque la logique : chaque coup répond à une catégorie de cibles
+        que les autres ne couvrent pas. C'est ce raisonnement, pas la
+        puissance brute, qui fait un bon moveset.
+      </p>
       <h3>À retenir</h3>
       <ul>
         <li>Structure type : 2 STAB + 1 couverture + 1 statut/utilité (à adapter au rôle).</li>

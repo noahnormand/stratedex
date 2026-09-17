@@ -45,6 +45,24 @@ export default function LeconEvIv() {
         entre les deux défenses.
       </p>
 
+      <h3>Les répartitions de référence</h3>
+      <table className="lesson-table">
+        <thead>
+          <tr><th>Profil</th><th>Répartition EV</th><th>Nature typique</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Attaquant physique rapide</td><td>252 Atq / 252 Vit / 4 PV</td><td>Rigide (+Atq) ou Jovial (+Vit)</td></tr>
+          <tr><td>Attaquant spécial rapide</td><td>252 Atq.Spé / 252 Vit / 4 PV</td><td>Modeste (+Atq.Spé) ou Timide (+Vit)</td></tr>
+          <tr><td>Mur physique</td><td>252 PV / 252 Déf / 4 Déf.Spé</td><td>Assuré (+Déf)</td></tr>
+          <tr><td>Mur spécial</td><td>252 PV / 252 Déf.Spé / 4 Déf</td><td>Calme (+Déf.Spé)</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Ces blocs "252/252/4" sont le point de départ, pas une loi : les
+        joueurs avancés ajustent au point près, par exemple juste assez de
+        Vitesse pour devancer une menace précise, et le reste dans la masse
+        défensive. C'est ce qu'on appelle des "benchmarks" de Vitesse.
+      </p>
       <h3>Essaie par toi-même</h3>
       <div className="lesson-controls lesson-controls-col">
         <label>Stat de base : <input type="number" min={1} max={255} value={base} onChange={(e) => setBase(Number(e.target.value))} /></label>

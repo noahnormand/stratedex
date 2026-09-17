@@ -68,6 +68,34 @@ export default function LeconTypes() {
         prends le réflexe de le consulter avant d'ajouter un Pokémon à ton
         équipe.
       </p>
+      <h3>Trois cas concrets à connaître</h3>
+      <ul>
+        <li>
+          <strong>Dracaufeu (Feu/Vol)</strong> : x4 face à Roche. Un simple
+          Éboulement peut le mettre KO, et le piège Piège de Roc lui retire
+          50% de ses PV à chaque entrée sur le terrain. Un double type cumule
+          aussi ses faiblesses.
+        </li>
+        <li>
+          <strong>Laggron (Eau/Sol)</strong> : le Sol annule la faiblesse
+          Électrik de l'Eau. Résultat : une seule faiblesse (Plante, x4).
+          Un bon double type peut effacer des faiblesses.
+        </li>
+        <li>
+          <strong>Ectoplasma (Spectre/Poison)</strong> : immunisé aux coups
+          Normal et Combat. Les immunités permettent de switcher sur un coup
+          adverse sans rien subir, c'est un levier tactique majeur.
+        </li>
+      </ul>
+      <h3>Comment lire un matchup en combat</h3>
+      <p>
+        Avant de choisir ton coup, pose-toi deux questions dans cet ordre :
+        "quel multiplicateur mes coups infligent-ils à son type ?" puis
+        "quel multiplicateur ses coups probables infligent-ils au mien ?".
+        Si les deux réponses te sont défavorables, la bonne action n'est
+        souvent pas d'attaquer mais de switcher vers un membre qui résiste.
+        Le compétitif se joue autant sur les changements que sur les attaques.
+      </p>
       <h3>À retenir</h3>
       <ul>
         <li>La table des types décide des multiplicateurs de dégâts : x0, x0.25, x0.5, x1, x2, x4.</li>

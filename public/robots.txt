@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://noahnormand.github.io/stratedex/sitemap.xml

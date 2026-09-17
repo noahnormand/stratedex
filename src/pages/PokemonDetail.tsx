@@ -59,7 +59,16 @@ export default function PokemonDetail() {
   }, [id]);
 
   if (error) return <p className="status">Erreur : {error}</p>;
-  if (!pokemon) return <p className="status">Chargement de la fiche...</p>;
+  if (!pokemon) {
+    return (
+      <div aria-hidden="true">
+        <div className="skeleton skeleton-line" style={{ width: "8rem" }} />
+        <div className="skeleton skeleton-hero" />
+        <div className="skeleton skeleton-block" />
+        <div className="skeleton skeleton-block" />
+      </div>
+    );
+  }
 
   const types = pokemon.types.map((t) => t.type.name as TypeSlug);
   const groups = groupMultipliers(getDefensiveMultipliers(types));

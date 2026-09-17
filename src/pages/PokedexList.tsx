@@ -63,11 +63,18 @@ export default function PokedexList() {
     );
   }, [entries, search, tierFilter]);
 
-  if (loading) return <p className="status">Chargement du Pokédex...</p>;
   if (error) return <p className="status">Erreur : {error}</p>;
 
   return (
     <section>
+      <div className="hero">
+        <h1>Le Pokédex orienté stratégie</h1>
+        <p>
+          Rôle, tier, résistances et faiblesses de chaque Pokémon, en
+          français. Nouveau dans le compétitif ?
+        </p>
+        <Link to="/cours" className="cta">Commencer les cours</Link>
+      </div>
       <div className="list-filters">
         <input
           type="search"
@@ -87,6 +94,13 @@ export default function PokedexList() {
           ))}
         </select>
       </div>
+      {loading && (
+        <ul className="pokedex-grid" aria-hidden="true">
+          {Array.from({ length: 18 }).map((_, i) => (
+            <li key={i} className="skeleton skeleton-card" />
+          ))}
+        </ul>
+      )}
       <ul className="pokedex-grid">
         {filtered.map((e) => (
           <li key={e.id}>

@@ -2,13 +2,26 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>StratéDex - Page introuvable</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StratéDex - Redirection</title>
+    <style>
+      body { margin: 0; background: #15181d; color: #e7e4dc; font-family: "IBM Plex Sans", system-ui, sans-serif; display: grid; place-items: center; min-height: 100vh; }
+      main { text-align: center; padding: 2rem; }
+      h1 { border-bottom: 2px solid #cf4a4a; display: inline-block; padding-bottom: 0.4rem; }
+      a { color: #e7e4dc; }
+    </style>
     <script>
       // GitHub Pages ne connaît pas les routes côté client :
-      // on redirige vers l'accueil en conservant le chemin demandé.
+      // on mémorise le chemin demandé et on renvoie vers l'application.
       sessionStorage.setItem("stratedex-redirect", location.pathname);
       location.replace("/stratedex/");
     </script>
   </head>
-  <body>Redirection...</body>
+  <body>
+    <main>
+      <h1>StratéDex</h1>
+      <p>Redirection vers la page demandée...</p>
+      <p><a href="/stratedex/">Aller à l'accueil</a></p>
+    </main>
+  </body>
 </html>

@@ -1,89 +1,186 @@
-/* Styles minimalistes, non finalisés : la direction visuelle viendra plus tard. */
+/* StratéDex - direction visuelle.
+   Inspirée des références du secteur (Smogon, PokemonDB, Pikalytics) :
+   dense en données, utilitaire, tableaux soignés, chips de types aux
+   couleurs officielles comme principale touche de couleur.
+   Choix : coins nets, bordures 1px, aucune ombre, aucun dégradé, aucune
+   animation au survol ; thème sombre et clair selon le système. */
 
 :root {
-  color-scheme: light dark;
-  font-family: system-ui, sans-serif;
+  --bg: #15181d;
+  --surface: #1c2027;
+  --surface-2: #232832;
+  --border: #323a46;
+  --text: #e7e4dc;
+  --muted: #9aa1ac;
+  --accent: #cf4a4a;        /* rouge sobre, clin d'oeil Pokéball */
+  --accent-text: #ffffff;
+  --ok: #5d9c62;
+  --warn: #c9a13c;
+  --danger: #c45050;
+  color-scheme: dark;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
 }
 
-body { margin: 0; }
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f1efe9;          /* fond chaud, pas de blanc pur */
+    --surface: #faf8f3;
+    --surface-2: #edeae2;
+    --border: #cfc9bc;
+    --text: #23262b;
+    --muted: #6b7078;
+    --accent: #b83c3c;
+    --accent-text: #ffffff;
+    --ok: #3f7d45;
+    --warn: #8f6f1d;
+    --danger: #a83c3c;
+    color-scheme: light;
+  }
+}
 
-.app { max-width: 960px; margin: 0 auto; padding: 1rem; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.55; }
+img { max-width: 100%; }
+a { color: inherit; }
+h1 { font-size: 1.6rem; margin: 0.5rem 0 0.75rem; }
+h2 { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; }
+h3 { font-size: 1.05rem; margin: 1.25rem 0 0.4rem; }
+table { font-variant-numeric: tabular-nums; }
 
+.app { max-width: 1040px; margin: 0 auto; padding: 0 1rem 2rem; }
+
+/* En-tête */
 .app-header {
   display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #8884;
-  margin-bottom: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 0;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 0.75rem;
 }
+.app-brand { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+.app-title { font-size: 1.35rem; font-weight: 700; text-decoration: none; letter-spacing: 0.01em; }
+.app-subtitle { color: var(--muted); font-size: 0.85rem; }
+.app-nav { display: flex; gap: 0.9rem; flex-wrap: wrap; font-size: 0.95rem; }
+.app-nav a { text-decoration: none; color: var(--muted); padding: 0.15rem 0; border-bottom: 2px solid transparent; }
+.app-nav a:hover, .app-nav a:focus-visible { color: var(--text); border-bottom-color: var(--accent); }
 
-.app-title { font-size: 1.4rem; font-weight: 700; text-decoration: none; color: inherit; }
-.app-subtitle { opacity: 0.7; font-size: 0.9rem; }
+/* Fil d'Ariane */
+.breadcrumb { font-size: 0.85rem; color: var(--muted); margin: 0.25rem 0 0.75rem; }
+.breadcrumb a { color: var(--muted); }
+.breadcrumb span { color: var(--text); }
 
-.status { opacity: 0.8; }
-
-.search {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0.5rem 0.75rem;
-  font-size: 1rem;
-  margin-bottom: 1rem;
+/* Générique */
+.intro { max-width: 68ch; color: var(--muted); }
+.status { color: var(--muted); }
+.cta {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--accent-text);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--accent);
 }
+.cta:hover, .cta:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
 
+.hero { border: 1px solid var(--border); background: var(--surface); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+.hero h1 { margin-top: 0; }
+.hero p { max-width: 60ch; color: var(--muted); }
+
+button { font-family: inherit; }
+input, select {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.6rem;
+}
+input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Squelettes de chargement */
+@keyframes skeleton-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.95; } }
+.skeleton { background: var(--surface-2); border: 1px solid var(--border); animation: skeleton-pulse 1.4s ease-in-out infinite; }
+.skeleton-card { min-height: 128px; }
+.skeleton-line { height: 1.1rem; margin: 0.5rem 0; }
+.skeleton-hero { height: 160px; margin: 0.75rem 0; }
+.skeleton-block { height: 220px; margin: 0.75rem 0; }
+.skeleton-battle { height: 340px; margin: 0.75rem 0; }
+
+/* Pokédex : liste */
+.list-filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.list-filters .search { flex: 1; min-width: 220px; margin: 0; }
+.search { width: 100%; }
 .pokedex-grid {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
   gap: 0.5rem;
 }
-
 .pokedex-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.5rem;
-  border: 1px solid #8884;
+  gap: 0.15rem;
+  padding: 0.6rem 0.4rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
   text-decoration: none;
-  color: inherit;
 }
+.pokedex-card:hover, .pokedex-card:focus-visible { border-color: var(--accent); }
+.pokedex-num { color: var(--muted); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+.pokedex-name { font-weight: 600; font-size: 0.95rem; text-align: center; }
 
-.pokedex-num { opacity: 0.6; font-size: 0.8rem; }
-.pokedex-name { }
-
-.detail-header { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
-.role { max-width: 60ch; }
-
-.stats-table th { text-align: left; padding-right: 1rem; }
-.stats-table td { padding-right: 0.75rem; }
-.stat-bar-cell { width: 220px; }
-.stat-bar { height: 0.6rem; background: #6a8; min-width: 2px; }
-
-.type-matchups th { text-align: left; padding: 0.25rem 1rem 0.25rem 0; vertical-align: top; white-space: nowrap; }
-.type-matchups td { padding: 0.25rem 0; }
-
+/* Chips de types : couleurs officielles, texte sombre lisible */
 .type-tags { display: inline-flex; flex-wrap: wrap; gap: 0.3rem; }
 .type-tag {
-  padding: 0.1rem 0.5rem;
-  border: 1px solid #8886;
-  font-size: 0.85rem;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1d1f22;
+  border: 1px solid rgba(0, 0, 0, 0.35);
 }
+.type-normal { background: #a8a77a; } .type-fire { background: #ee8130; }
+.type-water { background: #6390f0; } .type-electric { background: #f7d02c; }
+.type-grass { background: #7ac74c; } .type-ice { background: #96d9d6; }
+.type-fighting { background: #c22e28; color: #fff; } .type-poison { background: #a33ea1; color: #fff; }
+.type-ground { background: #e2bf65; } .type-flying { background: #a98ff3; }
+.type-psychic { background: #f95587; } .type-bug { background: #a6b91a; }
+.type-rock { background: #b6a136; } .type-ghost { background: #735797; color: #fff; }
+.type-dragon { background: #6f35fc; color: #fff; } .type-dark { background: #705746; color: #fff; }
+.type-steel { background: #b7b7ce; } .type-fairy { background: #d685ad; }
 
-.moves-list {
-  columns: 3;
-  font-size: 0.9rem;
+/* Badges de tier */
+.tier-badge {
+  display: inline-block;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: 0.05rem 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
-@media (max-width: 640px) {
-  .moves-list { columns: 2; }
-}
+.tier-badge-line { margin: 0.4rem 0; font-size: 0.9rem; }
+.tier-badge-small { font-size: 0.72rem; margin-top: 0.15rem; }
 
-/* --- Team Builder --- */
-.app-nav { margin-left: auto; display: flex; gap: 1rem; }
-.app-nav a { color: inherit; text-decoration: none; opacity: 0.85; }
-.intro { max-width: 65ch; opacity: 0.85; }
+/* Fiche Pokémon */
+.detail-header { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; border: 1px solid var(--border); background: var(--surface); padding: 1rem; }
+.detail-header h1 { margin: 0 0 0.35rem; }
+.role { max-width: 62ch; }
+.stats-table { border-collapse: collapse; }
+.stats-table th { text-align: left; padding: 0.2rem 1rem 0.2rem 0; color: var(--muted); font-weight: 600; }
+.stats-table td { padding-right: 0.75rem; }
+.stat-bar-cell { width: 220px; }
+.stat-bar { height: 0.6rem; background: var(--ok); min-width: 2px; }
+.type-matchups th { text-align: left; padding: 0.3rem 1rem 0.3rem 0; vertical-align: top; white-space: nowrap; color: var(--muted); font-weight: 600; }
+.type-matchups td { padding: 0.3rem 0; }
+.moves-list { columns: 3; font-size: 0.9rem; }
+@media (max-width: 640px) { .moves-list { columns: 2; } }
 
+/* Team Builder */
 .team-search { position: relative; }
 .suggestions {
   list-style: none;
@@ -93,8 +190,8 @@ body { margin: 0; }
   z-index: 2;
   inset-inline: 0;
   top: 100%;
-  background: Canvas;
-  border: 1px solid #8886;
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 .suggestions button {
   display: flex;
@@ -104,13 +201,11 @@ body { margin: 0; }
   padding: 0.35rem 0.6rem;
   background: none;
   border: 0;
-  font: inherit;
   color: inherit;
   cursor: pointer;
   text-align: left;
 }
-.suggestions button:hover { background: #8882; }
-
+.suggestions button:hover, .suggestions button:focus-visible { background: var(--surface-2); }
 .team-grid {
   list-style: none;
   padding: 0;
@@ -126,97 +221,102 @@ body { margin: 0; }
   align-items: center;
   gap: 0.25rem;
   padding: 0.6rem;
-  border: 1px solid #8884;
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
-.team-card-empty { justify-content: center; opacity: 0.4; min-height: 110px; }
+.team-card-empty { justify-content: center; color: var(--muted); min-height: 116px; }
 .team-card .remove {
   position: absolute;
-  top: 0.2rem;
-  right: 0.3rem;
+  top: 0.15rem;
+  right: 0.25rem;
   background: none;
   border: 0;
   font-size: 1.1rem;
   cursor: pointer;
-  color: inherit;
-  opacity: 0.6;
+  color: var(--muted);
 }
-
-.coverage-alerts { border: 1px solid #c664; padding: 0 1rem 0.5rem; margin: 1rem 0; }
-.coverage-table { border-collapse: collapse; width: 100%; }
-.coverage-table th, .coverage-table td { text-align: left; padding: 0.3rem 0.6rem; border-bottom: 1px solid #8883; }
-.coverage-danger td { color: #c33; }
-
-/* Partenaires suggérés */
+.team-card .remove:hover { color: var(--danger); }
+.completer { border: 1px solid var(--border); background: var(--surface); padding: 0 1rem 1rem; margin: 1rem 0; }
+.completer-pool { display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem; }
+.completer-tier { margin-left: 0.4rem; }
 .partners {
   list-style: none;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 0.4rem;
 }
 .partners button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
   width: 100%;
-  padding: 0.35rem 0.5rem;
-  background: none;
-  border: 1px solid #8884;
-  font: inherit;
+  padding: 0.4rem 0.5rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   color: inherit;
   cursor: pointer;
   text-align: left;
 }
-.partner-note { margin-left: auto; opacity: 0.65; font-size: 0.8rem; white-space: nowrap; }
+.partners button:hover, .partners button:focus-visible { border-color: var(--accent); }
+.partner-note { width: 100%; color: var(--muted); font-size: 0.8rem; }
+.coverage-alerts { border: 1px solid var(--danger); background: var(--surface); padding: 0 1rem 0.5rem; margin: 1rem 0; }
+.coverage-table { border-collapse: collapse; width: 100%; }
+.coverage-table th, .coverage-table td { text-align: left; padding: 0.35rem 0.6rem; border-bottom: 1px solid var(--border); }
+.coverage-danger td { color: var(--danger); }
 
-/* --- Tier lists --- */
+/* Tier lists */
 .format-tabs { display: flex; gap: 0.4rem; margin: 0.75rem 0; flex-wrap: wrap; }
-.tab {
-  padding: 0.35rem 0.8rem;
-  border: 1px solid #8885;
-  background: none;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-}
-.tab-active { border-color: currentColor; font-weight: 600; }
-.tier-meta { opacity: 0.7; font-size: 0.9rem; }
-.tier-block { border-top: 1px solid #8883; padding-top: 0.25rem; }
-.tier-rank { font-size: 1.6rem; margin: 0.5rem 0; }
+.tab { padding: 0.35rem 0.8rem; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; }
+.tab-active { border-color: var(--accent); color: var(--text); font-weight: 600; }
+.tier-meta { color: var(--muted); font-size: 0.9rem; }
+.tier-block { border-top: 1px solid var(--border); padding-top: 0.25rem; }
+.tier-rank { font-size: 1.5rem; margin: 0.5rem 0; }
 .tier-entries { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
-.tier-entry-head { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; color: inherit; }
+.tier-entry { border: 1px solid var(--border); background: var(--surface); padding: 0.6rem 0.75rem; }
+.tier-entry-head { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; }
 .tier-entry-head > span { display: flex; flex-direction: column; gap: 0.2rem; }
-.tier-comment { margin: 0.25rem 0 0; max-width: 70ch; opacity: 0.9; }
-
-/* Usage réel */
-.usage-block { border-top: 1px solid #8883; margin-top: 0.75rem; }
+.tier-comment { margin: 0.35rem 0 0; max-width: 70ch; color: var(--muted); }
+.usage-block { border-top: 1px solid var(--border); margin-top: 0.75rem; }
 .usage-list { padding-left: 1.5rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.2rem 1.5rem; }
-.usage-entry { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit; }
-.usage-pct { opacity: 0.65; font-variant-numeric: tabular-nums; }
+.usage-entry { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+.usage-pct { color: var(--muted); }
 
-/* --- Cours --- */
+/* Cours */
 .lessons-list { padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
-.lessons-list a { color: inherit; text-decoration: none; display: block; padding: 0.5rem 0.75rem; border: 1px solid #8884; }
-.lessons-list p { margin: 0.25rem 0 0; opacity: 0.8; }
-.lesson-done a { border-color: #6a8; }
-.lesson-badge { margin-left: 0.5rem; font-size: 0.8rem; color: #6a8; }
-
-.lesson { max-width: 72ch; }
-.lesson h3 { margin-top: 1.5rem; }
+.lessons-list a { text-decoration: none; display: block; padding: 0.6rem 0.85rem; border: 1px solid var(--border); background: var(--surface); }
+.lessons-list a:hover, .lessons-list a:focus-visible { border-color: var(--accent); }
+.lessons-list p { margin: 0.25rem 0 0; color: var(--muted); }
+.lesson-done a { border-left: 3px solid var(--ok); }
+.lesson-badge { margin-left: 0.5rem; font-size: 0.8rem; color: var(--ok); }
+.lesson { max-width: 74ch; }
 .lesson-controls { display: flex; gap: 1rem; flex-wrap: wrap; margin: 0.75rem 0; }
 .lesson-controls-col { flex-direction: column; gap: 0.5rem; max-width: 26rem; }
 .lesson-controls label { display: flex; align-items: center; gap: 0.5rem; }
-.lesson-controls fieldset { border: 1px solid #8884; display: flex; flex-direction: column; gap: 0.5rem; }
-.lesson-result { border: 1px solid #8884; padding: 0.6rem 0.8rem; }
-.lesson-note { opacity: 0.65; font-size: 0.9rem; }
-.lesson-footer { border-top: 1px solid #8883; margin-top: 1.5rem; padding-top: 0.75rem; }
+.lesson-controls fieldset { border: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.5rem; }
+.lesson-result { border: 1px solid var(--border); background: var(--surface); padding: 0.6rem 0.8rem; }
+.lesson-note { color: var(--muted); font-size: 0.9rem; }
+.lesson-footer { border-top: 1px solid var(--border); margin-top: 1.5rem; padding-top: 0.75rem; }
 .lesson-nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.75rem; flex-wrap: wrap; }
+.lesson-table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; }
+.lesson-table th, .lesson-table td { border: 1px solid var(--border); text-align: left; padding: 0.4rem 0.6rem; vertical-align: top; }
+.lesson-table th { background: var(--surface-2); }
 
-/* --- Quiz combat --- */
-.quiz { margin-top: 2rem; border-top: 1px solid #8883; padding-top: 0.5rem; }
+/* Rôles, Histoire, À propos, légal */
+.role-block, .era { border-top: 1px solid var(--border); max-width: 75ch; }
+.faq-item { border: 1px solid var(--border); background: var(--surface); margin: 0.4rem 0; max-width: 75ch; }
+.faq-item summary { padding: 0.55rem 0.8rem; cursor: pointer; font-weight: 600; }
+.faq-item p { padding: 0 0.8rem 0.7rem; margin: 0; color: var(--muted); }
+.apropos, .legal, .histoire { max-width: 78ch; }
+.notfound { text-align: center; padding: 3rem 0; }
+
+/* Quiz et cas pratiques : décor de combat (couleurs volontairement fixes,
+   fidèles aux jeux, lisibles dans les deux thèmes) */
+.quiz { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 0.5rem; }
 .battle {
-  border: 2px solid #445;
-  background: #9aca6a; /* herbe des combats, aplat */
+  border: 2px solid #38414f;
+  background: #8fbc63;
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -227,68 +327,33 @@ body { margin: 0; }
 .battle-enemy { justify-content: flex-end; }
 .battle-player { justify-content: flex-start; }
 .battle-side img { image-rendering: pixelated; }
-.hp-box {
-  background: #f8f0d8;
-  border: 2px solid #445;
-  padding: 0.3rem 0.6rem;
-  min-width: 200px;
-}
+.hp-box { background: #f8f0d8; border: 2px solid #38414f; padding: 0.3rem 0.6rem; min-width: 210px; }
 .hp-name { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.9rem; }
-.hp-bar { border: 1px solid #445; background: #d8d0b8; height: 0.55rem; margin-top: 0.25rem; }
+.hp-bar { border: 1px solid #38414f; background: #d8d0b8; height: 0.55rem; margin-top: 0.25rem; }
 .hp-fill { height: 100%; transition: width 0.4s steps(8); }
 .hp-high { background: #4a9e46; }
 .hp-mid { background: #cfa53c; }
 .hp-low { background: #c04040; }
-.battle-textbox {
-  border: 2px solid #445;
-  border-top: 0;
-  background: #f8f0d8;
-  color: #1c2210;
-  padding: 0.75rem;
-}
+.hp-pct { font-size: 0.8rem; }
+.battle-textbox { border: 2px solid #38414f; border-top: 0; background: #f8f0d8; color: #1c2210; padding: 0.75rem; }
 .battle-text { margin: 0 0 0.6rem; }
-.battle-moves {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
-}
+.battle-moves { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
 .battle-moves button, .battle-actions button {
-  border: 2px solid #445;
-  background: #fff;
+  border: 2px solid #38414f;
+  background: #fffdf6;
   color: #1c2210;
-  font: inherit;
   padding: 0.5rem 0.6rem;
   cursor: pointer;
   text-align: left;
 }
-.battle-moves button:focus-visible, .battle-actions button:focus-visible { outline: 3px solid #c04040; }
+.battle-moves button:hover, .battle-actions button:hover { background: #efe7cd; }
+.battle-move-detail { display: block; color: #5c614f; font-size: 0.8rem; }
 @media (max-width: 560px) {
   .battle-moves { grid-template-columns: 1fr; }
   .hp-box { min-width: 0; flex: 1; }
 }
 
-.lesson-table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; }
-.lesson-table th, .lesson-table td { border: 1px solid #8884; text-align: left; padding: 0.4rem 0.6rem; vertical-align: top; }
-
-/* Rôles */
-.role-block { border-top: 1px solid #8883; max-width: 75ch; }
-
-/* Tiers */
-.list-filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-.list-filters .search { margin-bottom: 0; }
-.list-filters select { font: inherit; padding: 0.4rem; }
-.tier-badge {
-  display: inline-block;
-  border: 1px solid currentColor;
-  padding: 0.05rem 0.45rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-.tier-badge-line { margin: 0.4rem 0; }
-.tier-badge-small { font-size: 0.75rem; margin-top: 0.15rem; opacity: 0.85; }
-
-/* Complétiste */
-.completer { border: 1px solid #8884; padding: 0 1rem 1rem; margin: 1rem 0; }
-.completer-pool { display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem; }
-.completer-pool select { font: inherit; padding: 0.3rem; }
-.completer-tier { margin-left: 0.4rem; }
+/* Pied de page */
+.app-footer { border-top: 1px solid var(--border); margin-top: 2.5rem; padding-top: 1rem; color: var(--muted); font-size: 0.88rem; }
+.app-footer nav { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.app-footer a { color: var(--muted); }

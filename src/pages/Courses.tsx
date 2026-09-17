@@ -29,6 +29,11 @@ export default function Courses() {
           </li>
         ))}
       </ol>
+      <p>
+        Leçons terminées ? Passe à la pratique avec les{" "}
+        <Link to="/cas-pratiques">Cas pratiques</Link> : des situations de
+        combat générées à l'infini pour tester tes réflexes.
+      </p>
     </section>
   );
 }

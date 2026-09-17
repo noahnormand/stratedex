@@ -1,6 +1,7 @@
 // src/pages/TeamBuilder.tsx
-// Composer une équipe de 6 et visualiser sa couverture de types :
-// pour chaque type offensif, qui est faible et qui résiste.
+// Composer une équipe de 6 : couverture défensive, alertes, et complétiste
+// qui propose des options viables (filtrées par tier) pour chaque slot vide.
+// L'équipe est conservée en localStorage.
 
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -10,6 +11,7 @@ import {
   spriteUrl,
 } from "../api/pokeapi";
 import { speciesFrName, speciesTypesById } from "../data/frNames";
+import { tierOf } from "../data/smogonTiers";
 import {
   TYPE_LABELS_FR,
   TYPE_SLUGS,
@@ -35,10 +37,44 @@ interface TeamMember {
   multipliers: Record<TypeSlug, number>;
 }
 
+// Viviers de suggestions par tier
+const POOLS = {
+  meta: { label: "Méta (OU, UUBL, UU)", tiers: ["OU", "UUBL", "UU"] as string[] | null },
+  large: { label: "Élargi (jusqu'à RU)", tiers: ["OU", "UUBL", "UU", "RUBL", "RU"] as string[] | null },
+  all: { label: "Tous les Pokémon", tiers: null as string[] | null },
+};
+type PoolKey = keyof typeof POOLS;
+
+const STORAGE_KEY = "stratedex-team";
+
+function loadTeamIds(): number[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const ids = raw ? (JSON.parse(raw) as number[]) : [];
+    return Array.isArray(ids) ? ids.slice(0, 6) : [];
+  } catch {
+    return [];
+  }
+}
+
+function memberFromId(id: number): TeamMember | null {
+  const types = speciesTypesById(id);
+  if (types.length === 0) return null;
+  return {
+    id,
+    nameFr: speciesFrName(id, `#${id}`),
+    types,
+    multipliers: getDefensiveMultipliers(types),
+  };
+}
+
 export default function TeamBuilder() {
   const [species, setSpecies] = useState<SpeciesEntry[]>([]);
   const [search, setSearch] = useState("");
-  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [pool, setPool] = useState<PoolKey>("meta");
+  const [team, setTeam] = useState<TeamMember[]>(() =>
+    loadTeamIds().map(memberFromId).filter((m): m is TeamMember => m !== null)
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,6 +91,15 @@ export default function TeamBuilder() {
       .catch((e: Error) => setError(e.message));
   }, []);
 
+  // Sauvegarde locale de l'équipe
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(team.map((m) => m.id)));
+    } catch {
+      // stockage indisponible : l'équipe ne sera pas conservée
+    }
+  }, [team]);
+
   const suggestions = useMemo(() => {
     const q = normalize(search.trim());
     if (q.length < 2) return [];
@@ -63,18 +108,11 @@ export default function TeamBuilder() {
       .slice(0, 8);
   }, [search, species, team]);
 
-  function addMember(entry: { id: number; nameFr: string }) {
-    const types = speciesTypesById(entry.id);
-    if (types.length === 0) return;
+  function addMember(id: number) {
+    const member = memberFromId(id);
+    if (!member) return;
     setTeam((prev) =>
-      prev.length >= 6 || prev.some((m) => m.id === entry.id)
-        ? prev
-        : [...prev, {
-            id: entry.id,
-            nameFr: entry.nameFr,
-            types,
-            multipliers: getDefensiveMultipliers(types),
-          }]
+      prev.length >= 6 || prev.some((m) => m.id === id) ? prev : [...prev, member]
     );
     setSearch("");
   }
@@ -83,8 +121,7 @@ export default function TeamBuilder() {
     setTeam((prev) => prev.filter((m) => m.id !== id));
   }
 
-  // Bilan par type offensif : membres faibles (x2/x4) et membres qui
-  // résistent (x0.5/x0.25/x0).
+  // Bilan par type offensif : membres faibles (x2/x4) et membres qui résistent.
   const coverage = useMemo(
     () =>
       TYPE_SLUGS.map((type) => {
@@ -97,33 +134,51 @@ export default function TeamBuilder() {
 
   const alerts = coverage.filter((c) => c.weak.length >= 2 && c.resist.length === 0);
 
-  // Partenaires suggérés : espèces hors équipe classées selon le nombre de
-  // types en alerte auxquels elles résistent (puis leur solidité globale).
-  const partners = useMemo(() => {
-    if (alerts.length === 0 || team.length >= 6) return [];
-    const alertTypes = alerts.map((a) => a.type);
+  // Complétiste : options pour le prochain slot vide, notées sur la
+  // couverture qu'elles apportent à l'équipe actuelle.
+  const completions = useMemo(() => {
+    if (team.length === 0 || team.length >= 6) return [];
+    const allowedTiers = POOLS[pool].tiers;
+
     return species
-      .filter((s) => !team.some((m) => m.id === s.id))
       .map((s) => {
+        if (team.some((m) => m.id === s.id)) return null;
+        const tier = tierOf(s.id);
+        if (allowedTiers && (!tier || tier.natDex || !allowedTiers.includes(tier.label))) return null;
         const types = speciesTypesById(s.id);
         if (types.length === 0) return null;
+
         const mult = getDefensiveMultipliers(types);
-        const covered = alertTypes.filter((t) => mult[t] < 1).length;
-        const totalResists = TYPE_SLUGS.filter((t) => mult[t] < 1).length;
-        return covered > 0 ? { ...s, types, covered, totalResists } : null;
+        let score = 0;
+        let covered = 0;   // faiblesses d'équipe non couvertes que ce Pokémon résiste
+        let stacked = 0;   // faiblesses qu'il partage avec des membres existants
+        for (const c of coverage) {
+          const m = mult[c.type];
+          if (m < 1 && c.weak.length > 0) {
+            score += c.weak.length * (c.resist.length === 0 ? 3 : 1);
+            if (c.resist.length === 0) covered++;
+          }
+          if (m >= 2 && c.weak.length > 0) {
+            score -= c.weak.length * (c.resist.length === 0 ? 2 : 1);
+            stacked++;
+          }
+        }
+        // Légère préférence aux tiers les plus hauts à score égal
+        if (tier?.label === "OU") score += 0.5;
+        return { id: s.id, nameFr: s.nameFr, types, tier: tier?.label ?? null, score, covered, stacked };
       })
-      .filter((x): x is NonNullable<typeof x> => x !== null)
-      .sort((a, b) => b.covered - a.covered || b.totalResists - a.totalResists)
-      .slice(0, 8);
-  }, [alerts, species, team]);
+      .filter((x): x is NonNullable<typeof x> => x !== null && x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6);
+  }, [species, team, coverage, pool]);
 
   return (
     <section>
       <h1>Team Builder</h1>
       <p className="intro">
-        Compose une équipe de 6 et vérifie sa couverture défensive : une bonne
-        équipe évite qu'une même faiblesse touche plusieurs membres sans
-        qu'aucun ne puisse venir résister.
+        Compose une équipe de 6 : le site vérifie ta couverture défensive,
+        t'alerte sur les faiblesses partagées et te propose des options pour
+        chaque slot vide. L'équipe est sauvegardée sur cet appareil.
       </p>
 
       <div className="team-search">
@@ -139,7 +194,7 @@ export default function TeamBuilder() {
           <ul className="suggestions">
             {suggestions.map((s) => (
               <li key={s.id}>
-                <button type="button" onClick={() => addMember(s)}>
+                <button type="button" onClick={() => addMember(s.id)}>
                   <img src={spriteUrl(s.id)} alt="" width={40} height={40} loading="lazy" />
                   {s.nameFr} <span className="pokedex-num">#{String(s.id).padStart(4, "0")}</span>
                 </button>
@@ -172,6 +227,57 @@ export default function TeamBuilder() {
         ))}
       </ul>
 
+      {team.length > 0 && team.length < 6 && (
+        <section className="completer">
+          <h2>Compléter l'équipe (slot {team.length + 1}/6)</h2>
+          <p className="lesson-note">
+            Options calculées d'après la couverture actuelle : combler d'abord
+            les faiblesses sans réponse, sans empiler celles qui existent
+            déjà. Choisis-en une ou cherche ton propre Pokémon, les options
+            suivantes s'adapteront.
+          </p>
+          <label className="completer-pool">
+            Vivier :{" "}
+            <select value={pool} onChange={(e) => setPool(e.target.value as PoolKey)}>
+              {Object.entries(POOLS).map(([k, v]) => (
+                <option key={k} value={k}>{v.label}</option>
+              ))}
+            </select>
+          </label>
+          {completions.length === 0 ? (
+            <p className="status">
+              Aucune option pertinente dans ce vivier : essaie un vivier plus
+              large, ou ta couverture est déjà excellente.
+            </p>
+          ) : (
+            <ul className="partners">
+              {completions.map((c) => (
+                <li key={c.id}>
+                  <button type="button" onClick={() => addMember(c.id)}>
+                    <img src={spriteUrl(c.id)} alt="" width={48} height={48} loading="lazy" />
+                    <span>
+                      {c.nameFr}
+                      {c.tier && <span className="tier-badge tier-badge-small completer-tier">{c.tier}</span>}
+                    </span>
+                    <span className="type-tags">
+                      {c.types.map((t) => (
+                        <span key={t} className={`type-tag type-${t}`}>{TYPE_LABELS_FR[t]}</span>
+                      ))}
+                    </span>
+                    <span className="partner-note">
+                      {c.covered > 0
+                        ? `couvre ${c.covered} faiblesse${c.covered > 1 ? "s" : ""} sans réponse`
+                        : "renforce la couverture"}
+                      {c.stacked > 0 ? ` - attention : ${c.stacked} faiblesse${c.stacked > 1 ? "s" : ""} en commun` : ""}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
       {team.length > 0 && (
         <>
           {alerts.length > 0 && (
@@ -186,29 +292,6 @@ export default function TeamBuilder() {
                   </li>
                 ))}
               </ul>
-              {partners.length > 0 && (
-                <>
-                  <h3>Partenaires suggérés</h3>
-                  <ul className="partners">
-                    {partners.map((p) => (
-                      <li key={p.id}>
-                        <button type="button" onClick={() => addMember(p)}>
-                          <img src={spriteUrl(p.id)} alt="" width={48} height={48} loading="lazy" />
-                          <span>{p.nameFr}</span>
-                          <span className="type-tags">
-                            {p.types.map((t) => (
-                              <span key={t} className={`type-tag type-${t}`}>{TYPE_LABELS_FR[t]}</span>
-                            ))}
-                          </span>
-                          <span className="partner-note">
-                            couvre {p.covered}/{alerts.length} alerte{alerts.length > 1 ? "s" : ""}
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
             </div>
           )}
 

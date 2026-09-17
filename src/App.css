@@ -286,3 +286,9 @@ body { margin: 0; }
 }
 .tier-badge-line { margin: 0.4rem 0; }
 .tier-badge-small { font-size: 0.75rem; margin-top: 0.15rem; opacity: 0.85; }
+
+/* Complétiste */
+.completer { border: 1px solid #8884; padding: 0 1rem 1rem; margin: 1rem 0; }
+.completer-pool { display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem; }
+.completer-pool select { font: inherit; padding: 0.3rem; }
+.completer-tier { margin-left: 0.4rem; }

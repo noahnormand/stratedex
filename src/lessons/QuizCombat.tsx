@@ -74,8 +74,9 @@ export default function QuizCombat({ slug, onWin }: { slug: string; onWin: () =>
     <section className="quiz" aria-label="Quiz de fin de leçon">
       <h2>Quiz : combat contre {enemyName}</h2>
       <p className="lesson-note">
-        Une bonne réponse inflige des dégâts à {enemyName}, une mauvaise t'en
-        inflige. Mets ses PV à zéro pour valider la leçon.
+        La Professeure te met à l'épreuve face à {enemyName}. Une bonne
+        réponse lui inflige des dégâts, une mauvaise t'en inflige. Mets ses
+        PV à zéro pour valider la leçon.
       </p>
 
       <div className="battle">

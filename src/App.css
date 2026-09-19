@@ -17,8 +17,12 @@
   --ok: #5d9c62;
   --warn: #c9a13c;
   --danger: #c45050;
+  --prof-accent: #4fa8a2;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-heading: "Bitter", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   color-scheme: dark;
-  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-family: var(--font-body);
 }
 
 @media (prefers-color-scheme: light) {
@@ -42,10 +46,10 @@
 body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.55; }
 img { max-width: 100%; }
 a { color: inherit; }
-h1 { font-size: 1.6rem; margin: 0.5rem 0 0.75rem; }
-h2 { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; }
-h3 { font-size: 1.05rem; margin: 1.25rem 0 0.4rem; }
-table { font-variant-numeric: tabular-nums; }
+h1 { font-family: var(--font-heading); font-weight: 800; font-size: 1.75rem; margin: 0.5rem 0 0.75rem; letter-spacing: -0.01em; }
+h2 { font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; margin: 1.5rem 0 0.5rem; }
+h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.05rem; margin: 1.25rem 0 0.4rem; }
+table { font-variant-numeric: tabular-nums; font-family: var(--font-mono); font-size: 0.92rem; }
 
 .app { max-width: 1040px; margin: 0 auto; padding: 0 1rem 2rem; }
 
@@ -60,12 +64,14 @@ table { font-variant-numeric: tabular-nums; }
   border-bottom: 2px solid var(--accent);
   margin-bottom: 0.75rem;
 }
-.app-brand { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
-.app-title { font-size: 1.35rem; font-weight: 700; text-decoration: none; letter-spacing: 0.01em; }
+.app-brand { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.app-logo { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+.app-title { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 800; letter-spacing: -0.01em; }
 .app-subtitle { color: var(--muted); font-size: 0.85rem; }
 .app-nav { display: flex; gap: 0.9rem; flex-wrap: wrap; font-size: 0.95rem; }
 .app-nav a { text-decoration: none; color: var(--muted); padding: 0.15rem 0; border-bottom: 2px solid transparent; }
 .app-nav a:hover, .app-nav a:focus-visible { color: var(--text); border-bottom-color: var(--accent); }
+.app-nav a.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
 
 /* Fil d'Ariane */
 .breadcrumb { font-size: 0.85rem; color: var(--muted); margin: 0.25rem 0 0.75rem; }
@@ -357,3 +363,74 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .app-footer { border-top: 1px solid var(--border); margin-top: 2.5rem; padding-top: 1rem; color: var(--muted); font-size: 0.88rem; }
 .app-footer nav { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
 .app-footer a { color: var(--muted); }
+
+/* Barre XP (progression des cours) */
+.xp-bar {
+  position: relative;
+  height: 1.6rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  margin: 0.75rem 0 1.25rem;
+  max-width: 28rem;
+  overflow: hidden;
+}
+.xp-bar-fill { height: 100%; background: var(--ok); transition: width 0.3s ease; }
+.xp-bar-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+/* Boîte de dialogue de la Professeure (distincte du combat : accent sarcelle) */
+.prof-box {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  border: 2px solid var(--prof-accent);
+  background: var(--surface);
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+.prof-portrait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1rem;
+  min-width: 96px;
+  background: var(--surface-2);
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+}
+.prof-avatar circle:first-child { stroke: none; }
+.prof-textbox { flex: 1; min-width: 220px; padding: 1rem 1.1rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.75rem; }
+.prof-text { margin: 0; font-size: 1.05rem; line-height: 1.5; min-height: 3.2em; }
+.prof-actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.prof-progress { color: var(--muted); font-family: var(--font-mono); font-size: 0.85rem; }
+.prof-actions button {
+  border: 1px solid var(--prof-accent);
+  background: var(--prof-accent);
+  color: #0d1a1a;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+.prof-actions button:hover { filter: brightness(1.08); }
+.prof-recap { margin: 0.5rem 0 1rem; }
+.prof-recap-btn {
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+.prof-recap-btn:hover { border-color: var(--prof-accent); color: var(--text); }

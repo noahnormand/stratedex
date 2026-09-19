@@ -3,7 +3,7 @@
 // de page de StratéDex.
 
 import { useEffect } from "react";
-import { Link, Route, Routes, useLocation } from "react-router-dom";
+import { Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
 import PokedexList from "./pages/PokedexList";
 import PokemonDetail from "./pages/PokemonDetail";
 import TeamBuilder from "./pages/TeamBuilder";
@@ -56,17 +56,26 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <div className="app-brand">
-          <Link to="/" className="app-title">StratéDex</Link>
+          <Link to="/" className="app-logo" aria-label="StratéDex, accueil">
+            <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+              <circle cx="16" cy="16" r="15" fill="var(--surface)" stroke="var(--accent)" strokeWidth="2" />
+              <path d="M1 16a15 15 0 0 1 30 0z" fill="var(--accent)" />
+              <rect x="1" y="14.6" width="30" height="2.8" fill="var(--bg)" />
+              <circle cx="16" cy="16" r="4.2" fill="var(--bg)" />
+              <circle cx="16" cy="16" r="2.3" fill="var(--surface)" />
+            </svg>
+            <span className="app-title">StratéDex</span>
+          </Link>
           <span className="app-subtitle">Apprendre la stratégie Pokémon</span>
         </div>
         <nav className="app-nav" aria-label="Navigation principale">
-          <Link to="/">Pokédex</Link>
-          <Link to="/cours">Cours</Link>
-          <Link to="/cas-pratiques">Cas pratiques</Link>
-          <Link to="/team-builder">Team Builder</Link>
-          <Link to="/tiers">Tier lists</Link>
-          <Link to="/roles">Rôles</Link>
-          <Link to="/histoire">Histoire</Link>
+          <NavLink to="/" end>Pokédex</NavLink>
+          <NavLink to="/cours">Cours</NavLink>
+          <NavLink to="/cas-pratiques">Cas pratiques</NavLink>
+          <NavLink to="/team-builder">Team Builder</NavLink>
+          <NavLink to="/tiers">Tier lists</NavLink>
+          <NavLink to="/roles">Rôles</NavLink>
+          <NavLink to="/histoire">Histoire</NavLink>
         </nav>
       </header>
 

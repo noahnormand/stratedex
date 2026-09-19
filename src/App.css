@@ -434,3 +434,8 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
   cursor: pointer;
 }
 .prof-recap-btn:hover { border-color: var(--prof-accent); color: var(--text); }
+
+/* Portrait illustré de la Professeure */
+.prof-avatar { display: block; }
+.battle-move-detail .type-tag { text-transform: capitalize; margin-right: 0.3rem; vertical-align: middle; }
+.battle-prompt { font-weight: 600; }

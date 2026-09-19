@@ -8,41 +8,21 @@ import { useCallback, useEffect, useState } from "react";
 import { fetchPokemon, type Pokemon } from "../api/pokeapi";
 import { speciesFrName, speciesTypesById } from "../data/frNames";
 import { tierOf } from "../data/smogonTiers";
+import { computeDamage, statOf } from "../data/damage";
 import {
   TYPE_LABELS_FR,
   TYPE_SLUGS,
   getDefensiveMultipliers,
-  getEffectiveness,
   type TypeSlug,
 } from "../data/typeChart";
 
 const SPRITES = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
 const VIABLE_TIERS = ["OU", "UUBL", "UU", "RUBL", "RU"];
 
-function statOf(p: Pokemon, name: string): number {
-  return p.stats.find((s) => s.stat.name === name)?.base_stat ?? 50;
-}
-
-/** PV max approximatifs au niveau 50 (IV 31, 0 EV). */
-function maxHp(p: Pokemon): number {
-  return Math.floor(((2 * statOf(p, "hp") + 31) * 50) / 100) + 60;
-}
-
-/** Stats approximatives au niveau 50 (IV 31, 0 EV, nature neutre). */
-function statAt50(base: number): number {
-  return Math.floor(((2 * base + 31) * 50) / 100) + 5;
-}
-
 /** Pourcentage de PV retirés par un coup (formule officielle simplifiée, niveau 50). */
 function damagePct(attacker: Pokemon, defender: Pokemon, moveType: TypeSlug, power: number): number {
   const physical = statOf(attacker, "attack") >= statOf(attacker, "special-attack");
-  const off = statAt50(statOf(attacker, physical ? "attack" : "special-attack"));
-  const def = statAt50(statOf(defender, physical ? "defense" : "special-defense"));
-  const defTypes = defender.types.map((t) => t.type.name as TypeSlug);
-  const mult = defTypes.reduce((m, t) => m * getEffectiveness(moveType, t), 1);
-  const stab = attacker.types.some((t) => t.type.name === moveType) ? 1.5 : 1;
-  const raw = Math.floor(Math.floor((22 * power * off) / def) / 50) + 2;
-  return Math.round(((raw * mult * stab * 0.925) / maxHp(defender)) * 100); // 0.925 = jet moyen
+  return computeDamage(attacker, defender, moveType, power, physical ? "physical" : "special").pct;
 }
 
 interface ActionOption {

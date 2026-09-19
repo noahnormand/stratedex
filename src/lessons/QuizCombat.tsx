@@ -1,15 +1,18 @@
 // src/lessons/QuizCombat.tsx
-// QCM de fin de leçon présenté comme un combat Pokémon : le joueur (Pikachu,
-// de dos) affronte un Pokémon thématique. Bonne réponse = dégâts à
-// l'adversaire, mauvaise réponse = dégâts au joueur. Victoire = leçon validée.
+// Vrai combat de fin de leçon : le joueur (Pikachu) affronte un Pokémon
+// thématique avec 4 attaques réelles chacun. Dégâts, efficacité des types
+// et ordre d'action (vitesse + priorité) sont calculés à partir des vraies
+// stats PokéAPI. Victoire = leçon validée.
 
-import { useState } from "react";
-import { QUIZZES, PLAYER_ID } from "../data/quiz";
+import { useEffect, useState } from "react";
+import { fetchPokemon, type Pokemon } from "../api/pokeapi";
 import { speciesFrName } from "../data/frNames";
+import { LESSON_BATTLES, PLAYER_ID, PLAYER_MOVES, type MoveDef } from "../data/battleMoves";
+import { computeDamage, effectivenessLabel, statOf } from "../data/damage";
 
 const SPRITES = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
 
-type Phase = "question" | "feedback" | "victory" | "defeat";
+type Phase = "loading" | "choose" | "victory" | "defeat";
 
 function hpClass(pct: number): string {
   if (pct > 50) return "hp-fill hp-high";
@@ -17,129 +20,171 @@ function hpClass(pct: number): string {
   return "hp-fill hp-low";
 }
 
+/** IA simple : choisit le coup qui inflige le plus de dégâts. */
+function bestMove(moves: MoveDef[], attacker: Pokemon, defender: Pokemon): MoveDef {
+  let best = moves[0];
+  let bestPct = -1;
+  for (const m of moves) {
+    const pct = computeDamage(attacker, defender, m.type, m.power, m.category === "status" ? "physical" : m.category).pct;
+    if (pct > bestPct) { bestPct = pct; best = m; }
+  }
+  return best;
+}
+
 export default function QuizCombat({ slug, onWin }: { slug: string; onWin: () => void }) {
-  const quiz = QUIZZES[slug];
-  const [index, setIndex] = useState(0);
+  const battle = LESSON_BATTLES[slug];
+  const [player, setPlayer] = useState<Pokemon | null>(null);
+  const [enemy, setEnemy] = useState<Pokemon | null>(null);
   const [playerHp, setPlayerHp] = useState(100);
   const [enemyHp, setEnemyHp] = useState(100);
-  const [phase, setPhase] = useState<Phase>("question");
-  const [selected, setSelected] = useState<number | null>(null);
+  const [phase, setPhase] = useState<Phase>("loading");
+  const [log, setLog] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!quiz) return null;
+  useEffect(() => {
+    if (!battle) return;
+    setPhase("loading");
+    Promise.all([fetchPokemon(PLAYER_ID), fetchPokemon(battle.opponentId)])
+      .then(([p, e]) => {
+        setPlayer(p);
+        setEnemy(e);
+        setPlayerHp(100);
+        setEnemyHp(100);
+        setLog([`${speciesFrName(e.id, e.name)} apparaît !`]);
+        setPhase("choose");
+      })
+      .catch((err: Error) => setError(err.message));
+  }, [battle]);
 
-  const total = quiz.questions.length;
-  const damage = Math.ceil(100 / total);
-  const q = quiz.questions[index];
-  const enemyName = speciesFrName(quiz.opponentId, "???");
-  const playerName = speciesFrName(PLAYER_ID, "Pikachu");
-  const correct = selected !== null && selected === q.answerIndex;
-
-  function answer(i: number) {
-    if (phase !== "question") return;
-    setSelected(i);
-    if (i === q.answerIndex) {
-      const hp = Math.max(0, enemyHp - damage);
-      setEnemyHp(hp);
-      if (hp === 0) {
-        setPhase("victory");
-        onWin();
-        return;
-      }
-    } else {
-      const hp = Math.max(0, playerHp - damage);
-      setPlayerHp(hp);
-      if (hp === 0) {
-        setPhase("defeat");
-        return;
-      }
-    }
-    setPhase("feedback");
+  if (!battle) return null;
+  if (error) return <p className="status">Erreur : {error}</p>;
+  if (phase === "loading" || !player || !enemy) {
+    return <div className="skeleton skeleton-battle" aria-hidden="true" />;
   }
 
-  function next() {
-    setSelected(null);
-    setPhase("question");
-    setIndex((i) => Math.min(i + 1, total - 1));
+  const playerName = speciesFrName(player.id, player.name);
+  const enemyName = speciesFrName(enemy.id, enemy.name);
+
+  function playRound(move: MoveDef) {
+    if (!player || !enemy || phase !== "choose") return;
+    const enemyMove = bestMove(battle.opponentMoves, enemy, player);
+
+    const playerFirst =
+      move.priority !== enemyMove.priority
+        ? move.priority > enemyMove.priority
+        : statOf(player, "speed") >= statOf(enemy, "speed");
+
+    const lines: string[] = [];
+    let nextPlayerHp = playerHp;
+    let nextEnemyHp = enemyHp;
+
+    function applyMove(
+      attackerName: string, defenderName: string,
+      mv: MoveDef, atk: Pokemon, def: Pokemon,
+      applyTo: "player" | "enemy"
+    ): boolean {
+      if (mv.power === 0) {
+        lines.push(`${attackerName} utilise ${mv.name} ! (${mv.effect ?? "effet de statut"})`);
+        return false;
+      }
+      const dmg = computeDamage(atk, def, mv.type, mv.power, mv.category === "status" ? "physical" : mv.category);
+      lines.push(`${attackerName} utilise ${mv.name} !`);
+      const effLabel = effectivenessLabel(dmg.effectiveness);
+      if (effLabel) lines.push(effLabel);
+      if (dmg.stab && dmg.effectiveness !== 0) lines.push(`(bonus STAB : ${mv.type === atk.types[0].type.name ? "même type que" : "type de"} ${attackerName})`);
+      const pct = Math.min(100, Math.max(0, dmg.pct));
+      if (applyTo === "player") nextPlayerHp = Math.max(0, nextPlayerHp - pct);
+      else nextEnemyHp = Math.max(0, nextEnemyHp - pct);
+      lines.push(`${defenderName} perd ${pct}% de ses PV.`);
+      return applyTo === "player" ? nextPlayerHp === 0 : nextEnemyHp === 0;
+    }
+
+    if (playerFirst) {
+      const enemyDown = applyMove(playerName, enemyName, move, player, enemy, "enemy");
+      if (!enemyDown) applyMove(enemyName, playerName, enemyMove, enemy, player, "player");
+    } else {
+      const playerDown = applyMove(enemyName, playerName, enemyMove, enemy, player, "player");
+      if (!playerDown) applyMove(playerName, enemyName, move, player, enemy, "enemy");
+    }
+
+    setPlayerHp(nextPlayerHp);
+    setEnemyHp(nextEnemyHp);
+    setLog(lines);
+
+    if (nextEnemyHp === 0) {
+      setPhase("victory");
+      onWin();
+    } else if (nextPlayerHp === 0) {
+      setPhase("defeat");
+    } else {
+      setPhase("choose");
+    }
   }
 
   function restart() {
-    setIndex(0);
     setPlayerHp(100);
     setEnemyHp(100);
-    setSelected(null);
-    setPhase("question");
+    setLog([`${enemyName} apparaît !`]);
+    setPhase("choose");
   }
 
   return (
-    <section className="quiz" aria-label="Quiz de fin de leçon">
-      <h2>Quiz : combat contre {enemyName}</h2>
+    <section className="quiz" aria-label="Combat de fin de leçon">
+      <h2>Combat : affronte {enemyName}</h2>
       <p className="lesson-note">
-        La Professeure te met à l'épreuve face à {enemyName}. Une bonne
-        réponse lui inflige des dégâts, une mauvaise t'en inflige. Mets ses
-        PV à zéro pour valider la leçon.
+        Choisis une attaque à chaque tour. L'ordre d'action dépend de la
+        priorité du coup puis de la Vitesse réelle des deux Pokémon.
       </p>
 
       <div className="battle">
         <div className="battle-side battle-enemy">
           <div className="hp-box">
-            <span className="hp-name">{enemyName} <small>N.{quiz.opponentLevel}</small></span>
+            <span className="hp-name">{enemyName} <small>N.{battle.opponentLevel}</small></span>
             <div className="hp-bar"><div className={hpClass(enemyHp)} style={{ width: `${enemyHp}%` }} /></div>
           </div>
-          <img src={`${SPRITES}/${quiz.opponentId}.png`} alt={enemyName} width={96} height={96} />
+          <img src={`${SPRITES}/${enemy.id}.png`} alt={enemyName} width={96} height={96} />
         </div>
         <div className="battle-side battle-player">
-          <img src={`${SPRITES}/back/${PLAYER_ID}.png`} alt={playerName} width={96} height={96} />
+          <img src={`${SPRITES}/back/${player.id}.png`} alt={playerName} width={96} height={96} />
           <div className="hp-box">
-            <span className="hp-name">{playerName} <small>N.{quiz.opponentLevel}</small></span>
+            <span className="hp-name">{playerName} <small>N.{battle.opponentLevel}</small></span>
             <div className="hp-bar"><div className={hpClass(playerHp)} style={{ width: `${playerHp}%` }} /></div>
           </div>
         </div>
       </div>
 
       <div className="battle-textbox">
-        {phase === "question" && (
+        {phase === "choose" && (
           <>
-            <p className="battle-text">Question {index + 1}/{total} : {q.question}</p>
+            {log.map((l, i) => <p key={i} className="battle-text">{l}</p>)}
+            <p className="battle-text battle-prompt">Que doit faire {playerName} ?</p>
             <div className="battle-moves">
-              {q.choices.map((c, i) => (
-                <button key={i} type="button" onClick={() => answer(i)}>{c}</button>
+              {PLAYER_MOVES.map((m) => (
+                <button key={m.name} type="button" onClick={() => playRound(m)}>
+                  {m.name}
+                  <small className="battle-move-detail">
+                    <span className={`type-tag type-${m.type}`}>{m.type}</span>{" "}
+                    {m.power > 0 ? `puissance ${m.power}` : "statut"}
+                  </small>
+                </button>
               ))}
             </div>
           </>
         )}
-        {phase === "feedback" && (
+        {(phase === "victory" || phase === "defeat") && (
           <>
-            <p className="battle-text">
-              <strong>{correct ? "C'est super efficace !" : "Ce n'est pas très efficace..."}</strong>{" "}
-              {q.explanation}
-            </p>
-            <div className="battle-actions">
-              <button type="button" onClick={next}>
-                {index + 1 < total ? "Question suivante" : "Continuer"}
-              </button>
-            </div>
-          </>
-        )}
-        {phase === "victory" && (
-          <>
-            <p className="battle-text">
-              <strong>{enemyName} est K.O. !</strong> {q.explanation} Tu as
-              terminé le quiz : la leçon est validée.
-            </p>
-            <div className="battle-actions">
-              <button type="button" onClick={restart}>Rejouer le quiz</button>
-            </div>
-          </>
-        )}
-        {phase === "defeat" && (
-          <>
-            <p className="battle-text">
-              <strong>{playerName} est K.O. !</strong> {q.explanation} Relis
-              la leçon au-dessus et retente ta chance.
-            </p>
-            <div className="battle-actions">
-              <button type="button" onClick={restart}>Réessayer</button>
-            </div>
+            {log.map((l, i) => <p key={i} className="battle-text">{l}</p>)}
+            {phase === "victory" ? (
+              <>
+                <p className="battle-text"><strong>{enemyName} est K.O. ! Tu as gagné le combat, la leçon est validée.</strong></p>
+                <div className="battle-actions"><button type="button" onClick={restart}>Rejouer le combat</button></div>
+              </>
+            ) : (
+              <>
+                <p className="battle-text"><strong>{playerName} est K.O. !</strong> Relis la leçon au-dessus et retente ta chance.</p>
+                <div className="battle-actions"><button type="button" onClick={restart}>Réessayer</button></div>
+              </>
+            )}
           </>
         )}
       </div>

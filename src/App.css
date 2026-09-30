@@ -403,13 +403,12 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
   justify-content: center;
   gap: 0.4rem;
   padding: 1rem;
-  min-width: 96px;
+  min-width: 148px;
   background: var(--surface-2);
   font-size: 0.78rem;
   color: var(--muted);
   text-align: center;
 }
-.prof-avatar circle:first-child { stroke: none; }
 .prof-textbox { flex: 1; min-width: 220px; padding: 1rem 1.1rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.75rem; }
 .prof-text { margin: 0; font-size: 1.05rem; line-height: 1.5; min-height: 3.2em; }
 .prof-actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
@@ -436,6 +435,12 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .prof-recap-btn:hover { border-color: var(--prof-accent); color: var(--text); }
 
 /* Portrait illustré de la Professeure */
-.prof-avatar { display: block; }
+.prof-avatar {
+  display: block;
+  width: 128px;
+  height: auto;
+  border: 1px solid var(--border);
+  object-fit: cover;
+}
 .battle-move-detail .type-tag { text-transform: capitalize; margin-right: 0.3rem; vertical-align: middle; }
 .battle-prompt { font-weight: 600; }

@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchPokemon, type Pokemon } from "../api/pokeapi";
 import { speciesFrName, speciesTypesById } from "../data/frNames";
+import { BattleArena } from "../lessons/BattleHud";
 import { tierOf } from "../data/smogonTiers";
 import { computeDamage, statOf } from "../data/damage";
 import {
@@ -16,7 +17,6 @@ import {
   type TypeSlug,
 } from "../data/typeChart";
 
-const SPRITES = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
 const VIABLE_TIERS = ["OU", "UUBL", "UU", "RUBL", "RU"];
 
 /** Pourcentage de PV retirés par un coup (formule officielle simplifiée, niveau 50). */
@@ -199,38 +199,24 @@ export default function CasPratiques() {
         <div className="skeleton skeleton-battle" aria-hidden="true" />
       ) : (
         <>
-          <div className="battle">
-            <div className="battle-side battle-enemy">
-              <div className="hp-box">
-                <span className="hp-name">{speciesFrName(scenario.enemy.id, scenario.enemy.name)} <small>N.50</small></span>
-                <div className="hp-bar"><div className={scenario.enemyHpPct > 50 ? "hp-fill hp-high" : scenario.enemyHpPct > 20 ? "hp-fill hp-mid" : "hp-fill hp-low"} style={{ width: `${scenario.enemyHpPct}%` }} /></div>
-                <span className="hp-pct">{scenario.enemyHpPct}% PV</span>
-              </div>
-              <img src={`${SPRITES}/${scenario.enemy.id}.png`} alt={speciesFrName(scenario.enemy.id, scenario.enemy.name)} width={96} height={96} />
-            </div>
-            <div className="battle-side battle-player">
-              <img src={`${SPRITES}/back/${scenario.player.id}.png`} alt={speciesFrName(scenario.player.id, scenario.player.name)} width={96} height={96} />
-              <div className="hp-box">
-                <span className="hp-name">{speciesFrName(scenario.player.id, scenario.player.name)} <small>N.50</small></span>
-                <div className="hp-bar"><div className={scenario.playerHpPct > 50 ? "hp-fill hp-high" : scenario.playerHpPct > 20 ? "hp-fill hp-mid" : "hp-fill hp-low"} style={{ width: `${scenario.playerHpPct}%` }} /></div>
-                <span className="hp-pct">{scenario.playerHpPct}% PV</span>
-              </div>
-            </div>
-          </div>
+          <BattleArena
+            enemy={{ pokemon: scenario.enemy, hp: scenario.enemyHpPct, max: 100 }}
+            player={{ pokemon: scenario.player, hp: scenario.playerHpPct, max: 100 }}
+          />
 
-          <div className="battle-textbox">
+          <div className="battle-dialog">
             {!chosen ? (
               <>
-                <p className="battle-text">
+                <p className="battle-message">
                   {speciesFrName(scenario.enemy.id, scenario.enemy.name)} est{" "}
                   {scenario.enemyFaster ? "plus rapide" : "plus lent"} que toi.
                   Que fais-tu ?
                 </p>
-                <div className="battle-moves">
+                <div className="move-menu">
                   {scenario.options.map((o) => (
-                    <button key={o.id} type="button" onClick={() => setChosen(o)}>
-                      {o.label}
-                      <small className="battle-move-detail">{o.detail}</small>
+                    <button key={o.id} type="button" className="move-btn" onClick={() => setChosen(o)}>
+                      <span className="move-name">{o.label}</span>
+                      <span className="move-meta">{o.detail}</span>
                     </button>
                   ))}
                 </div>
@@ -240,7 +226,7 @@ export default function CasPratiques() {
                 const r = evaluate(scenario, chosen);
                 return (
                   <>
-                    <p className="battle-text">
+                    <p className="battle-message">
                       <strong>{r.verdict}.</strong> {r.text}
                     </p>
                     <div className="battle-actions">

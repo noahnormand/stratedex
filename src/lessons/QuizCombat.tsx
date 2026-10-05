@@ -4,21 +4,27 @@
 // et ordre d'action (vitesse + priorité) sont calculés à partir des vraies
 // stats PokéAPI. Victoire = leçon validée.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchPokemon, type Pokemon } from "../api/pokeapi";
 import { speciesFrName } from "../data/frNames";
 import { LESSON_BATTLES, PLAYER_ID, PLAYER_MOVES, type MoveDef } from "../data/battleMoves";
-import { computeDamage, effectivenessLabel, statOf } from "../data/damage";
+import { TYPE_LABELS_FR } from "../data/typeChart";
+import { BattleArena, LEVEL } from "./BattleHud";
+import { computeDamage, effectivenessLabel, maxHp, statOf } from "../data/damage";
 
-const SPRITES = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
+const STEP_MS = 1300; // durée d'affichage d'une ligne du journal
 
-type Phase = "loading" | "choose" | "victory" | "defeat";
+type Phase = "loading" | "choose" | "playing" | "victory" | "defeat";
 
-function hpClass(pct: number): string {
-  if (pct > 50) return "hp-fill hp-high";
-  if (pct > 20) return "hp-fill hp-mid";
-  return "hp-fill hp-low";
+/** Un événement du tour : une ligne de texte + l'état de l'écran à ce moment. */
+interface Beat {
+  text: string;
+  playerHp: number;
+  enemyHp: number;
+  hit?: "player" | "enemy";   // qui clignote (a reçu un coup)
 }
+
+const CATEGORY_FR = { physical: "Physique", special: "Spéciale", status: "Statut" } as const;
 
 /** IA simple : choisit le coup qui inflige le plus de dégâts. */
 function bestMove(moves: MoveDef[], attacker: Pokemon, defender: Pokemon): MoveDef {
@@ -35,11 +41,16 @@ export default function QuizCombat({ slug, onWin }: { slug: string; onWin: () =>
   const battle = LESSON_BATTLES[slug];
   const [player, setPlayer] = useState<Pokemon | null>(null);
   const [enemy, setEnemy] = useState<Pokemon | null>(null);
-  const [playerHp, setPlayerHp] = useState(100);
-  const [enemyHp, setEnemyHp] = useState(100);
+  const [playerHp, setPlayerHp] = useState(0);
+  const [enemyHp, setEnemyHp] = useState(0);
   const [phase, setPhase] = useState<Phase>("loading");
-  const [log, setLog] = useState<string[]>([]);
+  const [message, setMessage] = useState("");
+  const [hit, setHit] = useState<"player" | "enemy" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const timers = useRef<number[]>([]);
+
+  const clearTimers = () => { timers.current.forEach(window.clearTimeout); timers.current = []; };
+  useEffect(() => clearTimers, []);
 
   useEffect(() => {
     if (!battle) return;
@@ -48,9 +59,9 @@ export default function QuizCombat({ slug, onWin }: { slug: string; onWin: () =>
       .then(([p, e]) => {
         setPlayer(p);
         setEnemy(e);
-        setPlayerHp(100);
-        setEnemyHp(100);
-        setLog([`${speciesFrName(e.id, e.name)} apparaît !`]);
+        setPlayerHp(maxHp(p));
+        setEnemyHp(maxHp(e));
+        setMessage(`Un ${speciesFrName(e.id, e.name)} sauvage apparaît !`);
         setPhase("choose");
       })
       .catch((err: Error) => setError(err.message));
@@ -64,67 +75,89 @@ export default function QuizCombat({ slug, onWin }: { slug: string; onWin: () =>
 
   const playerName = speciesFrName(player.id, player.name);
   const enemyName = speciesFrName(enemy.id, enemy.name);
+  const playerMax = maxHp(player);
+  const enemyMax = maxHp(enemy);
 
+  /** Construit la liste des événements du tour, puis les joue un par un. */
   function playRound(move: MoveDef) {
     if (!player || !enemy || phase !== "choose") return;
     const enemyMove = bestMove(battle.opponentMoves, enemy, player);
+    const pSpeed = statOf(player, "speed");
+    const eSpeed = statOf(enemy, "speed");
 
     const playerFirst =
       move.priority !== enemyMove.priority
         ? move.priority > enemyMove.priority
-        : statOf(player, "speed") >= statOf(enemy, "speed");
+        : pSpeed >= eSpeed;
 
-    const lines: string[] = [];
-    let nextPlayerHp = playerHp;
-    let nextEnemyHp = enemyHp;
+    const beats: Beat[] = [];
+    let pHp = playerHp;
+    let eHp = enemyHp;
 
+    // Explique l'ordre d'action (le coeur de la leçon sur la Vitesse)
+    if (move.priority !== enemyMove.priority) {
+      beats.push({ text: `${move.priority > enemyMove.priority ? playerName : enemyName} agit en premier grâce à la priorité de son coup.`, playerHp: pHp, enemyHp: eHp });
+    } else {
+      beats.push({ text: `${playerFirst ? playerName : enemyName} agit en premier (Vitesse ${playerFirst ? pSpeed : eSpeed} contre ${playerFirst ? eSpeed : pSpeed}).`, playerHp: pHp, enemyHp: eHp });
+    }
+
+    /** Joue un coup ; renvoie true si la cible tombe K.O. */
     function applyMove(
-      attackerName: string, defenderName: string,
-      mv: MoveDef, atk: Pokemon, def: Pokemon,
-      applyTo: "player" | "enemy"
+      attackerName: string, mv: MoveDef, atk: Pokemon, def: Pokemon, target: "player" | "enemy"
     ): boolean {
       if (mv.power === 0) {
-        lines.push(`${attackerName} utilise ${mv.name} ! (${mv.effect ?? "effet de statut"})`);
+        beats.push({ text: `${attackerName} utilise ${mv.name} ! (${mv.effect ?? "effet de statut"})`, playerHp: pHp, enemyHp: eHp });
         return false;
       }
       const dmg = computeDamage(atk, def, mv.type, mv.power, mv.category === "status" ? "physical" : mv.category);
-      lines.push(`${attackerName} utilise ${mv.name} !`);
-      const effLabel = effectivenessLabel(dmg.effectiveness);
-      if (effLabel) lines.push(effLabel);
-      if (dmg.stab && dmg.effectiveness !== 0) lines.push(`(bonus STAB : ${mv.type === atk.types[0].type.name ? "même type que" : "type de"} ${attackerName})`);
-      const pct = Math.min(100, Math.max(0, dmg.pct));
-      if (applyTo === "player") nextPlayerHp = Math.max(0, nextPlayerHp - pct);
-      else nextEnemyHp = Math.max(0, nextEnemyHp - pct);
-      lines.push(`${defenderName} perd ${pct}% de ses PV.`);
-      return applyTo === "player" ? nextPlayerHp === 0 : nextEnemyHp === 0;
+      const targetMax = target === "player" ? playerMax : enemyMax;
+      const loss = dmg.effectiveness === 0 ? 0 : Math.max(1, Math.round((Math.min(100, dmg.pct) / 100) * targetMax));
+      beats.push({ text: `${attackerName} utilise ${mv.name} !`, playerHp: pHp, enemyHp: eHp });
+      if (target === "player") pHp = Math.max(0, pHp - loss);
+      else eHp = Math.max(0, eHp - loss);
+      beats.push({ text: loss > 0 ? `${loss} PV perdus.` : "Aucun dégât.", playerHp: pHp, enemyHp: eHp, hit: loss > 0 ? target : undefined });
+      const eff = effectivenessLabel(dmg.effectiveness);
+      if (eff) beats.push({ text: eff, playerHp: pHp, enemyHp: eHp });
+      return (target === "player" ? pHp : eHp) === 0;
     }
 
     if (playerFirst) {
-      const enemyDown = applyMove(playerName, enemyName, move, player, enemy, "enemy");
-      if (!enemyDown) applyMove(enemyName, playerName, enemyMove, enemy, player, "player");
+      const down = applyMove(playerName, move, player, enemy, "enemy");
+      if (!down) applyMove(enemyName, enemyMove, enemy, player, "player");
     } else {
-      const playerDown = applyMove(enemyName, playerName, enemyMove, enemy, player, "player");
-      if (!playerDown) applyMove(playerName, enemyName, move, player, enemy, "enemy");
+      const down = applyMove(enemyName, enemyMove, enemy, player, "player");
+      if (!down) applyMove(playerName, move, player, enemy, "enemy");
     }
 
-    setPlayerHp(nextPlayerHp);
-    setEnemyHp(nextEnemyHp);
-    setLog(lines);
+    const outcome: Phase = eHp === 0 ? "victory" : pHp === 0 ? "defeat" : "choose";
+    if (outcome === "victory") beats.push({ text: `${enemyName} est K.O. ! Tu gagnes le combat, la leçon est validée.`, playerHp: pHp, enemyHp: eHp });
+    if (outcome === "defeat") beats.push({ text: `${playerName} est K.O. ! Relis la leçon et retente ta chance.`, playerHp: pHp, enemyHp: eHp });
 
-    if (nextEnemyHp === 0) {
-      setPhase("victory");
-      onWin();
-    } else if (nextPlayerHp === 0) {
-      setPhase("defeat");
-    } else {
-      setPhase("choose");
-    }
+    // Lecture séquentielle des événements
+    clearTimers();
+    setPhase("playing");
+    beats.forEach((b, i) => {
+      timers.current.push(window.setTimeout(() => {
+        setMessage(b.text);
+        setPlayerHp(b.playerHp);
+        setEnemyHp(b.enemyHp);
+        setHit(b.hit ?? null);
+      }, i * STEP_MS));
+    });
+    timers.current.push(window.setTimeout(() => {
+      setHit(null);
+      setPhase(outcome);
+      if (outcome === "victory") onWin();
+      if (outcome === "choose") setMessage(`Que doit faire ${playerName} ?`);
+    }, beats.length * STEP_MS));
   }
 
   function restart() {
-    setPlayerHp(100);
-    setEnemyHp(100);
-    setLog([`${enemyName} apparaît !`]);
+    clearTimers();
+    setPlayerHp(playerMax);
+    setEnemyHp(enemyMax);
+    setHit(null);
+    setMessage(`Un ${enemyName} sauvage apparaît !`);
     setPhase("choose");
   }
 
@@ -133,61 +166,39 @@ export default function QuizCombat({ slug, onWin }: { slug: string; onWin: () =>
       <h2>Combat : affronte {enemyName}</h2>
       <p className="lesson-note">
         Choisis une attaque à chaque tour. L'ordre d'action dépend de la
-        priorité du coup puis de la Vitesse réelle des deux Pokémon.
+        priorité du coup puis de la Vitesse réelle des deux Pokémon (stats au niveau {LEVEL}).
       </p>
 
-      <div className="battle">
-        <div className="battle-side battle-enemy">
-          <div className="hp-box">
-            <span className="hp-name">{enemyName} <small>N.{battle.opponentLevel}</small></span>
-            <div className="hp-bar"><div className={hpClass(enemyHp)} style={{ width: `${enemyHp}%` }} /></div>
-          </div>
-          <img src={`${SPRITES}/${enemy.id}.png`} alt={enemyName} width={96} height={96} />
-        </div>
-        <div className="battle-side battle-player">
-          <img src={`${SPRITES}/back/${player.id}.png`} alt={playerName} width={96} height={96} />
-          <div className="hp-box">
-            <span className="hp-name">{playerName} <small>N.{battle.opponentLevel}</small></span>
-            <div className="hp-bar"><div className={hpClass(playerHp)} style={{ width: `${playerHp}%` }} /></div>
-          </div>
-        </div>
+      <BattleArena
+        enemy={{ pokemon: enemy, hp: enemyHp, max: enemyMax, hit: hit === "enemy" }}
+        player={{ pokemon: player, hp: playerHp, max: playerMax, hit: hit === "player" }}
+        showPlayerNumbers
+      />
+
+      <div className="battle-dialog" aria-live="polite">
+        <p className="battle-message">{message}</p>
       </div>
 
-      <div className="battle-textbox">
-        {phase === "choose" && (
-          <>
-            {log.map((l, i) => <p key={i} className="battle-text">{l}</p>)}
-            <p className="battle-text battle-prompt">Que doit faire {playerName} ?</p>
-            <div className="battle-moves">
-              {PLAYER_MOVES.map((m) => (
-                <button key={m.name} type="button" onClick={() => playRound(m)}>
-                  {m.name}
-                  <small className="battle-move-detail">
-                    <span className={`type-tag type-${m.type}`}>{m.type}</span>{" "}
-                    {m.power > 0 ? `puissance ${m.power}` : "statut"}
-                  </small>
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-        {(phase === "victory" || phase === "defeat") && (
-          <>
-            {log.map((l, i) => <p key={i} className="battle-text">{l}</p>)}
-            {phase === "victory" ? (
-              <>
-                <p className="battle-text"><strong>{enemyName} est K.O. ! Tu as gagné le combat, la leçon est validée.</strong></p>
-                <div className="battle-actions"><button type="button" onClick={restart}>Rejouer le combat</button></div>
-              </>
-            ) : (
-              <>
-                <p className="battle-text"><strong>{playerName} est K.O. !</strong> Relis la leçon au-dessus et retente ta chance.</p>
-                <div className="battle-actions"><button type="button" onClick={restart}>Réessayer</button></div>
-              </>
-            )}
-          </>
-        )}
-      </div>
+      {phase === "choose" && (
+        <div className="move-menu" role="group" aria-label="Attaques">
+          {PLAYER_MOVES.map((m) => (
+            <button key={m.name} type="button" className="move-btn" onClick={() => playRound(m)}>
+              <span className="move-name">{m.name}</span>
+              <span className="move-meta">
+                <span className={`type-tag type-${m.type}`}>{TYPE_LABELS_FR[m.type]}</span>
+                <span>{CATEGORY_FR[m.category]}</span>
+                <span>{m.power > 0 ? `Puiss. ${m.power}` : "Statut"}</span>
+                {m.priority > 0 && <span>Priorité +{m.priority}</span>}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+      {(phase === "victory" || phase === "defeat") && (
+        <div className="battle-actions">
+          <button type="button" onClick={restart}>{phase === "victory" ? "Rejouer le combat" : "Réessayer"}</button>
+        </div>
+      )}
     </section>
   );
 }
